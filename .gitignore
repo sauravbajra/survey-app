@@ -7,7 +7,7 @@ wheels/
 *.egg-info
 
 bak/
-# .env
+.env
 
 # Virtual environments
 .venv

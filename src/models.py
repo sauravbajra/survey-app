@@ -1,7 +1,14 @@
+import enum
 from . import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from passlib.hash import pbkdf2_sha256 as sha256
+# from sqlalchemy_enum_tables import esqla_enum
+
+class SurveyStatus(enum.Enum):
+    DRAFT = 'draft'
+    PUBLISHED = 'published'
+    SCHEDULED = 'scheduled'
 
 class Survey(db.Model):
     __tablename__ = 'surveys'
@@ -9,11 +16,22 @@ class Survey(db.Model):
     survey_title = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    status = db.Column(db.Enum(SurveyStatus), nullable=False, default=SurveyStatus.DRAFT)
+    publish_date = db.Column(db.DateTime, nullable=True) # Nullable because only scheduled surveys need it
+    is_external = db.Column(db.Boolean, nullable=False, default=False)
+
     questions = db.relationship('Question', back_populates='survey', cascade="all, delete-orphan")
     submissions = db.relationship('Submission', back_populates='survey', cascade="all, delete-orphan")
 
     def to_dict(self):
-        return {"survey_id": self.survey_id, "survey_title": self.survey_title, "created_at": self.created_at.isoformat()}
+        return {
+            "survey_id": self.survey_id, 
+            "survey_title": self.survey_title, 
+            "created_at": self.created_at.isoformat(),
+            "status": self.status.value, 
+            "publish_date": self.publish_date.isoformat() if self.publish_date else None,
+            "is_external": self.is_external
+        }
 
 class Question(db.Model):
     __tablename__ = 'questions'
