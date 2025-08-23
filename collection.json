@@ -1,10 +1,81 @@
 {
 	"info": {
 		"_postman_id": "a1b2c3d4-e5f6-7890-1234-abcdef123456",
-		"name": "Survey API",
+		"name": "Survey API (with Auth)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "/register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var responseData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", responseData.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "System",
 			"item": [
@@ -32,20 +103,6 @@
 			"item": [
 				{
 					"name": "POST Create Survey",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var responseData = pm.response.json();",
-									"    pm.collectionVariables.set(\"survey_id\", responseData.survey_id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -69,285 +126,27 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "POST Add Question to Survey",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"question_title\": \"How likely are you to recommend us?\",\n    \"question_type\": \"SCALE\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/surveys/{{survey_id}}/questions",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"surveys",
-								"{{survey_id}}",
-								"questions"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GET Get All Surveys",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/surveys",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"surveys"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GET Get Survey by ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/surveys/{{survey_id}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"surveys",
-								"{{survey_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "PUT Update Survey Title",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"survey_title\": \"Updated Customer Feedback Survey\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/surveys/{{survey_id}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"surveys",
-								"{{survey_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "DELETE Delete Survey",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/surveys/{{survey_id}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"surveys",
-								"{{survey_id}}"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Submissions",
-			"item": [
-				{
-					"name": "POST Create Submission (Webhook)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var responseData = pm.response.json();",
-									"    pm.collectionVariables.set(\"submission_id\", responseData.submission_id);",
-									"",
-									"    var requestData = JSON.parse(pm.request.body.raw);",
-									"    pm.collectionVariables.set(\"survey_id\", requestData.surveyId);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"surveyId\": \"1aB2c3D4e5F6g7H8i9J0k-from-google-forms\",\n  \"questions\": [\n    {\n      \"title\": \"What is your full name?\",\n      \"type\": \"TEXT\"\n    },\n    {\n      \"title\": \"Which products did you use?\",\n      \"type\": \"CHECKBOX\"\n    }\n  ],\n  \"answers\": [\n    \"John Doe\",\n    [\"Product A\", \"Product C\"]\n  ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/webhook",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"webhook"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "POST Create Submission (API)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    var responseData = pm.response.json();",
-									"    pm.collectionVariables.set(\"submission_id\", responseData.submission_id);",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "[\n    {\n        \"question_id\": 1,\n        \"answer_value\": \"My first API answer!\"\n    },\n    {\n        \"question_id\": 2,\n        \"answer_value\": 10\n    }\n]",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/surveys/{{survey_id}}/submissions",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"surveys",
-								"{{survey_id}}",
-								"submissions"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GET Get Submissions for Survey",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/surveys/{{survey_id}}/submissions",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"surveys",
-								"{{survey_id}}",
-								"submissions"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GET Get Submission by ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/submissions/{{submission_id}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"submissions",
-								"{{submission_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "DELETE Delete Submission",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/submissions/{{submission_id}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"submissions",
-								"{{submission_id}}"
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		}
 	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
 	"variable": [
 		{
 			"key": "baseUrl",
 			"value": "http://127.0.0.1:5000"
 		},
 		{
-			"key": "survey_id",
-			"value": ""
-		},
-		{
-			"key": "submission_id",
+			"key": "access_token",
 			"value": ""
 		}
 	]

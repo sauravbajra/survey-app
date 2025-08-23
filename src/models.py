@@ -1,6 +1,7 @@
 from . import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
+from passlib.hash import pbkdf2_sha256 as sha256
 
 class Survey(db.Model):
     __tablename__ = 'surveys'
@@ -20,12 +21,14 @@ class Question(db.Model):
     survey_id = db.Column(db.String(255), db.ForeignKey('surveys.survey_id'), nullable=False)
     question_title = db.Column(db.Text, nullable=False)
     question_type = db.Column(db.String(50), nullable=False)
+    
+    options = db.Column(JSONB, nullable=True) # To store choices like ["Option A", "Option B"]
 
     survey = db.relationship('Survey', back_populates='questions')
     answers = db.relationship('Answer', back_populates='question', cascade="all, delete-orphan")
 
     def to_dict(self):
-        return {"question_id": self.question_id, "title": self.question_title, "type": self.question_type}
+        return {"question_id": self.question_id, "title": self.question_title, "type": self.question_type, "options": self.options}
 
 class Submission(db.Model):
     __tablename__ = 'submissions'
@@ -48,3 +51,17 @@ class Answer(db.Model):
 
     submission = db.relationship('Submission', back_populates='answers')
     question = db.relationship('Question', back_populates='answers')
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
+    @classmethod
+    def hash_password(cls, password):
+        return sha256.hash(password)
+
+    @classmethod
+    def verify_password(cls, password, hash):
+        return sha256.verify(password, hash)

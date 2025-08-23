@@ -21,7 +21,7 @@ def handle_survey_submission():
         for q_data in payload['questions']:
             question = Question.query.filter_by(survey_id=survey_id, question_title=q_data['title']).first()
             if not question:
-                question = Question(survey=survey, question_title=q_data['title'], question_type=q_data['type'])
+                question = Question(survey=survey, question_title=q_data['title'], question_type=q_data['type'], options=q_data.get('options'))
                 db.session.add(question)
             question_map[q_data['title']] = question
         
