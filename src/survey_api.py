@@ -19,8 +19,21 @@ def create_survey():
 
 @surveys_bp.route('/', methods=['GET'])
 def get_all_surveys():
-    surveys = Survey.query.order_by(Survey.created_at.desc()).all()
-    return jsonify([survey.to_dict() for survey in surveys])
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    surveys_pagination = Survey.query.order_by(Survey.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    results = [survey.to_dict() for survey in surveys_pagination.items]
+    
+    return jsonify({
+        "surveys": results,
+        "total_pages": surveys_pagination.pages,
+        "current_page": surveys_pagination.page,
+        "total_items": surveys_pagination.total
+    })
 
 @surveys_bp.route('/<string:survey_id>', methods=['GET'])
 def get_survey_by_id(survey_id):

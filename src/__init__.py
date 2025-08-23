@@ -26,7 +26,6 @@ def create_app(config_class=Config):
     app.register_blueprint(analytics_bp)
     app.register_blueprint(webhook_bp)
 
-    # --- System Blueprints (Healthcheck & Webhook) ---
     @app.route('/check-db-connection', methods=['GET'])
     def health_check():
         try:

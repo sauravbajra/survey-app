@@ -3,12 +3,24 @@ from .models import db, Survey, Submission, Answer
 
 submissions_bp = Blueprint('submissions_api', __name__)
 
-@submissions_bp.route('/<string:survey_id>/submissions', methods=['GET'])
+@submissions_bp.route('/surveys/<string:survey_id>/submissions', methods=['GET'])
 def get_submissions_for_survey(survey_id):
-    from .models import Submission
     survey = Survey.query.get_or_404(survey_id)
-    submissions = Submission.query.filter_by(survey_id=survey.survey_id).order_by(Submission.submitted_at.desc()).all()
-    return jsonify([s.to_dict() for s in submissions])
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    submissions_pagination = Submission.query.filter_by(survey_id=survey.survey_id).order_by(
+        Submission.submitted_at.desc()
+    ).paginate(page=page, per_page=per_page, error_out=False)
+    
+    results = [s.to_dict() for s in submissions_pagination.items]
+    
+    return jsonify({
+        "submissions": results,
+        "total_pages": submissions_pagination.pages,
+        "current_page": submissions_pagination.page,
+        "total_items": submissions_pagination.total
+    })
 
 @submissions_bp.route('/surveys/<string:survey_id>/submissions', methods=['POST'])
 def create_submission_for_survey(survey_id):
