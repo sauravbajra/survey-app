@@ -10,7 +10,8 @@ import {
     Td,
     Th,
     Thead,
-    Tr,
+  Tr,
+    Tag,
     useDisclosure,
     useToast,
     Badge,
@@ -222,7 +223,7 @@ function DashboardPage() {
                     fontWeight="medium"
                   >
                     {survey.survey_title}
-                    {survey.is_external ? <Badge colorScheme="purple" ml={2}  fontSize='0.75em' lineHeight={1.5} >External</Badge> : null}
+                    {survey.is_external ? <Tag colorScheme="purple" ml={2}  size='sm'>External</Tag> : null}
                   </Td>
 
                   <Td>{new Date(survey.created_at).toLocaleString()}</Td>
