@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager
 from apscheduler.schedulers.background import BackgroundScheduler # Import scheduler
 from datetime import datetime, timezone
 from sqlalchemy import text
+from flask_cors import CORS
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -44,6 +45,14 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    CORS(
+        app,
+        resources={r"/*": {"origins": "http://localhost:5173"}},
+        supports_credentials=True,
+        # Add the methods and headers your frontend needs
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"]
+    )
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
