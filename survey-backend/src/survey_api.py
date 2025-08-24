@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from .models import db, Survey, Question, SurveyStatus
 from flask_jwt_extended import jwt_required
 from datetime import datetime, timezone
+import uuid
 
 surveys_bp = Blueprint('surveys_api', __name__)
 
@@ -9,13 +10,17 @@ surveys_bp = Blueprint('surveys_api', __name__)
 @jwt_required()
 def create_survey():
     data = request.get_json()
-    if not data or not data.get('survey_id') or not data.get('survey_title'):
-        return jsonify({"status": "error", "message": "survey_id and survey_title are required"}), 400
+    if not data or not data.get('survey_title'):
+        return jsonify({"status": "error", "message": "survey_title is required"}), 400
 
-    if Survey.query.get(data['survey_id']):
-        return jsonify({"status": "error", "message": "Survey with this ID already exists"}), 409 # Conflict
+    title = data['survey_title']
+    survey_id = str(uuid.uuid4()) # Generate a random UUID and convert it to a string
 
-    new_survey = Survey(survey_id=data['survey_id'], survey_title=data['survey_title'])
+    new_survey = Survey(
+        survey_id=survey_id,
+        survey_title=title
+    )
+
     db.session.add(new_survey)
     db.session.commit()
     return jsonify(new_survey.to_dict()), 201

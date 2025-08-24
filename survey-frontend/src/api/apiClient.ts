@@ -4,7 +4,6 @@ import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000';
 
 interface SurveyData {
-  survey_id: string;
   survey_title: string;
   status?: 'draft' | 'published' | 'scheduled';
   publish_date?: string | null;
@@ -44,7 +43,7 @@ export const api = {
   // --- Surveys ---
   getSurveys: (page = 1, per_page = 10) => apiClient.get(`/surveys/?page=${page}&per_page=${per_page}`),
   getSurveyById: (surveyId: string) => apiClient.get(`/surveys/${surveyId}`),
-  createSurvey: (data: SurveyData) => apiClient.post('/surveys', data),
+  createSurvey: (data: SurveyData) => apiClient.post('/surveys/', data),
   updateSurvey: (surveyId: string, data: Partial<SurveyData>) => apiClient.put(`/surveys/${surveyId}`, data),
   deleteSurvey: (surveyId: string) => apiClient.delete(`/surveys/${surveyId}`),
 

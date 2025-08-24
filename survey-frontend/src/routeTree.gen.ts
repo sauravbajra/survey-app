@@ -13,8 +13,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SurveysCreateRouteImport } from './routes/surveys/create'
 import { Route as SurveysLayoutRouteImport } from './routes/surveys/_layout'
 import { Route as SurveysSurveyIdRouteImport } from './routes/surveys/$surveyId'
+import { Route as SurveysSurveyIdEditRouteImport } from './routes/surveys/$surveyId/edit'
 
 const SurveysRouteImport = createFileRoute('/surveys')()
 
@@ -33,6 +35,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SurveysCreateRoute = SurveysCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => SurveysRoute,
+} as any)
 const SurveysLayoutRoute = SurveysLayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => SurveysRoute,
@@ -42,32 +49,55 @@ const SurveysSurveyIdRoute = SurveysSurveyIdRouteImport.update({
   path: '/surveys/$surveyId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SurveysSurveyIdEditRoute = SurveysSurveyIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => SurveysSurveyIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/surveys/$surveyId': typeof SurveysSurveyIdRoute
+  '/surveys/$surveyId': typeof SurveysSurveyIdRouteWithChildren
   '/surveys': typeof SurveysLayoutRoute
+  '/surveys/create': typeof SurveysCreateRoute
+  '/surveys/$surveyId/edit': typeof SurveysSurveyIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/surveys/$surveyId': typeof SurveysSurveyIdRoute
+  '/surveys/$surveyId': typeof SurveysSurveyIdRouteWithChildren
   '/surveys': typeof SurveysLayoutRoute
+  '/surveys/create': typeof SurveysCreateRoute
+  '/surveys/$surveyId/edit': typeof SurveysSurveyIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/surveys/$surveyId': typeof SurveysSurveyIdRoute
+  '/surveys/$surveyId': typeof SurveysSurveyIdRouteWithChildren
   '/surveys': typeof SurveysRouteWithChildren
   '/surveys/_layout': typeof SurveysLayoutRoute
+  '/surveys/create': typeof SurveysCreateRoute
+  '/surveys/$surveyId/edit': typeof SurveysSurveyIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/surveys/$surveyId' | '/surveys'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/surveys/$surveyId'
+    | '/surveys'
+    | '/surveys/create'
+    | '/surveys/$surveyId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/surveys/$surveyId' | '/surveys'
+  to:
+    | '/'
+    | '/login'
+    | '/surveys/$surveyId'
+    | '/surveys'
+    | '/surveys/create'
+    | '/surveys/$surveyId/edit'
   id:
     | '__root__'
     | '/'
@@ -75,12 +105,14 @@ export interface FileRouteTypes {
     | '/surveys/$surveyId'
     | '/surveys'
     | '/surveys/_layout'
+    | '/surveys/create'
+    | '/surveys/$surveyId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
-  SurveysSurveyIdRoute: typeof SurveysSurveyIdRoute
+  SurveysSurveyIdRoute: typeof SurveysSurveyIdRouteWithChildren
   SurveysRoute: typeof SurveysRouteWithChildren
 }
 
@@ -107,6 +139,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/surveys/create': {
+      id: '/surveys/create'
+      path: '/create'
+      fullPath: '/surveys/create'
+      preLoaderRoute: typeof SurveysCreateRouteImport
+      parentRoute: typeof SurveysRoute
+    }
     '/surveys/_layout': {
       id: '/surveys/_layout'
       path: '/surveys'
@@ -121,15 +160,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SurveysSurveyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/surveys/$surveyId/edit': {
+      id: '/surveys/$surveyId/edit'
+      path: '/edit'
+      fullPath: '/surveys/$surveyId/edit'
+      preLoaderRoute: typeof SurveysSurveyIdEditRouteImport
+      parentRoute: typeof SurveysSurveyIdRoute
+    }
   }
 }
 
+interface SurveysSurveyIdRouteChildren {
+  SurveysSurveyIdEditRoute: typeof SurveysSurveyIdEditRoute
+}
+
+const SurveysSurveyIdRouteChildren: SurveysSurveyIdRouteChildren = {
+  SurveysSurveyIdEditRoute: SurveysSurveyIdEditRoute,
+}
+
+const SurveysSurveyIdRouteWithChildren = SurveysSurveyIdRoute._addFileChildren(
+  SurveysSurveyIdRouteChildren,
+)
+
 interface SurveysRouteChildren {
   SurveysLayoutRoute: typeof SurveysLayoutRoute
+  SurveysCreateRoute: typeof SurveysCreateRoute
 }
 
 const SurveysRouteChildren: SurveysRouteChildren = {
   SurveysLayoutRoute: SurveysLayoutRoute,
+  SurveysCreateRoute: SurveysCreateRoute,
 }
 
 const SurveysRouteWithChildren =
@@ -138,7 +198,7 @@ const SurveysRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
-  SurveysSurveyIdRoute: SurveysSurveyIdRoute,
+  SurveysSurveyIdRoute: SurveysSurveyIdRouteWithChildren,
   SurveysRoute: SurveysRouteWithChildren,
 }
 export const routeTree = rootRouteImport

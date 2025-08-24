@@ -1,6 +1,8 @@
+import React from 'react';
 import { createFileRoute, Outlet } from '@tanstack/react-router';
-import MainLayout from '../../layouts/MainLayout';
 
 export const Route = createFileRoute('/surveys/_layout')({
-  component: () => <MainLayout><Outlet /></MainLayout>,
+  // The component should just render the Outlet, as the MainLayout
+  // is already applied by the root route for all authenticated pages.
+  component: () => <Outlet />,
 });
