@@ -70,6 +70,7 @@ def create_app(config_class=Config):
     from .webhook import webhook_bp
     from .auth_api import auth_bp
     from .email_api import email_bp
+    from .public_api import public_bp
 
     app.register_blueprint(surveys_bp, url_prefix='/surveys')
     app.register_blueprint(submissions_bp)
@@ -77,6 +78,7 @@ def create_app(config_class=Config):
     app.register_blueprint(webhook_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(email_bp)
+    app.register_blueprint(public_bp, url_prefix='/public')
 
     @app.route('/check-db-connection', methods=['GET'])
     def health_check():

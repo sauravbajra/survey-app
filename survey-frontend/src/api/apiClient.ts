@@ -34,6 +34,21 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+apiClient.interceptors.response.use(
+  (response) => response, // If the response is successful, just pass it through
+  (error) => {
+    // Check if the error is a 401 Unauthorized
+    if (error.response && (error.response.status === 401 || error.response.status === 422)) {
+      // Clear the expired token
+      localStorage.removeItem('accessToken');
+      // Redirect to the login page
+      window.location.href = '/login';
+      // You could also show a toast message here if you set up a global toast provider
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const api = {
   // --- Auth ---
   login: (username: string, password: string) => apiClient.post('/login', { username, password }),
@@ -53,11 +68,14 @@ export const api = {
   deleteQuestion: (questionId: number) => apiClient.delete(`/surveys/questions/${questionId}`),
 
   // --- Submissions ---
-  getSubmissionsForSurvey: (surveyId: string, page = 1, per_page = 10) => apiClient.get(`/surveys/${surveyId}/submissions/?page=${page}&per_page=${per_page}`),
+  getSubmissionsForSurvey: (surveyId: string, page = 1, per_page = 10) => apiClient.get(`/surveys/${surveyId}/submissions?page=${page}&per_page=${per_page}`),
   getSubmissionById: (submissionId: number) => apiClient.get(`/submissions/${submissionId}`),
   createSubmission: (surveyId: string, answers: SubmissionAnswer[]) => apiClient.post(`/surveys/${surveyId}/submissions`, answers),
   deleteSubmission: (submissionId: number) => apiClient.delete(`/submissions/${submissionId}`),
 
   // --- Analytics ---
-  getSurveyAnalytics: (surveyId: string) => apiClient.get(`/surveys/${surveyId}/analytics/`),
+  getSurveyAnalytics: (surveyId: string) => apiClient.get(`/surveys/${surveyId}/analytics`),
+
+  getPublicSurvey: (surveyId: string) => apiClient.get(`/public/surveys/${surveyId}`),
+  submitPublicSurvey: (surveyId: string, answers: SubmissionAnswer[]) => apiClient.post(`/public/surveys/${surveyId}/submit`, answers),
 };
