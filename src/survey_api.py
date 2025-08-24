@@ -25,13 +25,13 @@ def create_survey():
 def get_all_surveys():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    
+
     surveys_pagination = Survey.query.order_by(Survey.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
-    
+
     results = [survey.to_dict() for survey in surveys_pagination.items]
-    
+
     return jsonify({
         "surveys": results,
         "total_pages": surveys_pagination.pages,
@@ -47,6 +47,7 @@ def get_survey_by_id(survey_id):
     return jsonify(survey_details)
 
 @surveys_bp.route('/<string:survey_id>/questions', methods=['POST'])
+@jwt_required()
 def create_question_for_survey(survey_id):
     survey = Survey.query.get_or_404(survey_id)
 
@@ -63,6 +64,7 @@ def create_question_for_survey(survey_id):
     return jsonify(new_question.to_dict()), 201
 
 @surveys_bp.route('/<string:survey_id>', methods=['PUT'])
+@jwt_required()
 def update_survey(survey_id):
     """Updates a survey's title, status, or publish date."""
     survey = Survey.query.get_or_404(survey_id)
@@ -79,7 +81,7 @@ def update_survey(survey_id):
         status_value = data['status']
         if status_value not in [s.value for s in SurveyStatus]:
             return jsonify({"status": "error", "message": f"Invalid status. Must be one of {', '.join([s.value for s in SurveyStatus])}"}), 400
-        
+
         survey.status = SurveyStatus(status_value)
 
     if 'publish_date' in data:
@@ -106,10 +108,11 @@ def update_survey(survey_id):
     return jsonify(survey.to_dict())
 
 @surveys_bp.route('/questions/<int:question_id>', methods=['PUT'])
+@jwt_required()
 def update_question(question_id):
     """Updates a question's title, type, or options."""
     question = Question.query.get_or_404(question_id)
-    
+
     if question.survey.is_external:
         return jsonify({"status": "error", "message": "Questions of an external survey cannot be modified."}), 403
 
@@ -126,7 +129,7 @@ def update_question(question_id):
         if new_options is not None and new_options != []:
             return jsonify({"status": "error", "message": "Options must be null or empty for TEXT questions."}), 400
         new_options = None
-    
+
     elif new_type.upper() in ['MULTIPLE_CHOICE', 'CHECKBOX', 'DROPDOWN']:
         if not isinstance(new_options, list) or not new_options:
             return jsonify({"status": "error", "message": f"A non-empty list of options is required for {new_type} questions."}), 400
@@ -135,11 +138,12 @@ def update_question(question_id):
     question.question_title = new_title
     question.question_type = new_type
     question.options = new_options
-        
+
     db.session.commit()
     return jsonify(question.to_dict())
 
 @surveys_bp.route('/questions/<int:question_id>', methods=['DELETE'])
+@jwt_required()
 def delete_question(question_id):
     """Deletes a single question."""
     question = Question.query.get_or_404(question_id)
@@ -148,6 +152,7 @@ def delete_question(question_id):
     return jsonify({"status": "success", "message": "Question deleted successfully"})
 
 @surveys_bp.route('/<string:survey_id>', methods=['DELETE'])
+@jwt_required()
 def delete_survey(survey_id):
     survey = Survey.query.get_or_404(survey_id)
     db.session.delete(survey)

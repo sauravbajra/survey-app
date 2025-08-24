@@ -50,7 +50,7 @@ def create_app(config_class=Config):
 
         # --- CONFIGURE AND START SCHEDULER ---
     scheduler = BackgroundScheduler(daemon=True)
-    scheduler.add_job(publish_scheduled_surveys, 'interval', minutes=1, args=[app])
+    scheduler.add_job(publish_scheduled_surveys, 'interval', minutes=5, args=[app])
     scheduler.start()
 
     # Import and register blueprints
