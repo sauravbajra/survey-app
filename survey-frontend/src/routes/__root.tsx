@@ -7,6 +7,9 @@ export const Route = createRootRoute({
   // This function runs before the route loads
   beforeLoad: ({ context, location }) => {
     const auth = context.auth;
+    if (location.pathname.endsWith('/viewForm')) {
+  return; // Stop here and allow access
+}
     // If the user is not authenticated and not on the login page, redirect them
     if (!auth?.token && location.pathname !== '/login') {
       throw redirect({

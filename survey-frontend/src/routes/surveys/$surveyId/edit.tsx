@@ -56,10 +56,29 @@ function EditSurveyPage() {
   const [questions, setQuestions] = useState<QuestionForm[]>([]);
   const [publishDate, setPublishDate] = useState('');
   const [publishOption, setPublishOption] = useState<'immediately' | 'later'>('immediately');
-  const [initialStatus, setInitialStatus] = useState<'draft' | 'published' | 'scheduled'>('draft');
+  const [, setInitialStatus] = useState<'draft' | 'published' | 'scheduled'>('draft');
 
   // Fetch existing survey data
-  const { data: surveyData, isLoading: isLoadingSurvey } = useQuery({
+  // Define type for survey data returned by API
+  type SurveyQuestion = {
+    question_id: number;
+    title: string;
+    type: string;
+    options: string[] | number[] | null;
+  };
+
+  type SurveyData = {
+    survey_id: string;
+    survey_title: string;
+    status: 'draft' | 'published' | 'scheduled';
+    publish_date?: string | null;
+    questions: SurveyQuestion[];
+    created_at?: string;
+  };
+
+  const { data: surveyData, isLoading: isLoadingSurvey } = useQuery<{
+    data: SurveyData;
+  }>({
     queryKey: ['survey', surveyId],
     queryFn: () => api.getSurveyById(surveyId),
     enabled: !!surveyId,
@@ -70,12 +89,19 @@ function EditSurveyPage() {
     if (surveyData) {
       const survey = surveyData.data;
       setTitle(survey.survey_title);
-      setQuestions(survey.questions.map((q: any) => ({ ...q, id: q.question_id })));
+      setQuestions(
+        (survey.questions ?? []).map((q: any) => ({
+          id: q.question_id,
+          question_id: q.question_id,
+          question_title: q.title || '',
+          question_type: q.type || 'TEXT',
+          options: q.options ?? [],
+        }))
+      );
       setInitialStatus(survey.status);
 
       if (survey.status === 'scheduled' && survey.publish_date) {
         setPublishOption('later');
-        // Format date for datetime-local input
         const localDate = new Date(survey.publish_date).toISOString().slice(0, 16);
         setPublishDate(localDate);
       }
@@ -87,6 +113,20 @@ function EditSurveyPage() {
     onSuccess: async () => {
       // Logic to update/create/delete questions can be added here
       // For simplicity, we'll just show a success message for the survey update
+        await Promise.all(
+    questions
+      .filter(q => q.question_id)
+      .map(q =>
+        updateQuestionMutation.mutateAsync({
+          questionId: q.question_id!,
+          data: {
+            question_title: q.question_title,
+            question_type: q.question_type,
+            options: q.options,
+          },
+        })
+      )
+  );
       toast({
         title: 'Survey updated.',
         description: "Your survey has been updated successfully.",
@@ -96,7 +136,7 @@ function EditSurveyPage() {
       });
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
       queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
-      navigate({ to: '/surveys/$surveyId/', params: { surveyId } });
+      navigate({ to: '/surveys/$surveyId/preview', params: { surveyId } });
     },
     onError: (error: any) => {
       toast({
@@ -108,6 +148,22 @@ function EditSurveyPage() {
       });
     },
   });
+  const updateQuestionMutation = useMutation({
+  mutationFn: ({ questionId, data }: { questionId: number, data: Partial<QuestionForm> }) =>
+    api.updateQuestion(questionId, data),
+  onSuccess: () => {
+    // Optionally show a toast or refetch questions
+  },
+  onError: (error: any) => {
+    toast({
+      title: 'Question update failed.',
+      description: error.response?.data?.message || 'An error occurred.',
+      status: 'error',
+      duration: 5000,
+      isClosable: true,
+    });
+  },
+});
 
   const handleAddQuestion = () => {
     setQuestions([...questions, { id: `new-${Date.now()}`, question_title: '', question_type: 'TEXT', options: [] }]);

@@ -2,11 +2,11 @@ import React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Heading, Text } from '@chakra-ui/react';
-import { api } from '../../api/apiClient';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import ErrorDisplay from '../../components/ErrorDisplay';
+import { api } from '../../../api/apiClient';
+import LoadingSpinner from '../../../components/LoadingSpinner';
+import ErrorDisplay from '../../../components/ErrorDisplay';
 
-export const Route = createFileRoute('/surveys/$surveyId')({
+export const Route = createFileRoute('/surveys/$surveyId/preview')({
   component: SurveyDetailPage,
 });
 

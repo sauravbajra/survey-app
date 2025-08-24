@@ -14,11 +14,32 @@ def create_survey():
         return jsonify({"status": "error", "message": "survey_title is required"}), 400
 
     title = data['survey_title']
-    survey_id = str(uuid.uuid4()) # Generate a random UUID and convert it to a string
+    status_value = data.get('status', 'draft') # Default to 'draft' if not provided
+    publish_date_str = data.get('publish_date')
+
+    if status_value not in [s.value for s in SurveyStatus]:
+        return jsonify({"status": "error", "message": f"Invalid status. Must be one of {', '.join([s.value for s in SurveyStatus])}"}), 400
+
+    survey_id = str(uuid.uuid4())
+    publish_date = None
+
+    if publish_date_str:
+        try:
+            publish_date = datetime.fromisoformat(publish_date_str.replace('Z', '+00:00'))
+        except (ValueError, TypeError):
+            return jsonify({"status": "error", "message": "Invalid publish_date format. Use ISO 8601 format."}), 400
+
+    if status_value == SurveyStatus.SCHEDULED.value:
+        if not publish_date:
+            return jsonify({"status": "error", "message": "publish_date is required for scheduled surveys"}), 400
+        if publish_date <= datetime.now(timezone.utc):
+            return jsonify({"status": "error", "message": "Publish date for scheduled surveys must be in the future."}), 400
 
     new_survey = Survey(
-        survey_id=survey_id,
-        survey_title=title
+      survey_id=survey_id,
+      survey_title=title,
+      status=SurveyStatus(status_value), # Use the Enum object
+      publish_date=publish_date # Use the parsed date or None
     )
 
     db.session.add(new_survey)

@@ -1,23 +1,29 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Box, Button, Heading, HStack, Table, Tbody, Td, Th, Thead, Tr, useDisclosure, useToast } from '@chakra-ui/react';
-import { ChevronRight, Plus, Edit, Trash2 } from 'lucide-react';
+import { Box, Button, Heading, HStack, Table, Tbody, Td, Th, Thead, Tr, useDisclosure, useToast, Badge } from '@chakra-ui/react';
+import { ChevronRight, Plus, Edit, Trash2, BarChart2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { api } from '../api/apiClient';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog';
+import { useAuth } from '../context/AuthContext';
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
+  validateSearch: (search) => ({
+    page: typeof search.page === 'string' ? parseInt(search.page, 10) || 1 : 1,
+  }),
 });
 
 function DashboardPage() {
+  const { token } = useAuth();
   const navigate = useNavigate();
-  const [page, setPage] = React.useState(1);
+  const { page } = Route.useSearch();
   const pageSize = 10;
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['surveys', page, pageSize],
     queryFn: () => api.getSurveys(page, pageSize),
+    enabled: !!token
   });
 
   const toast = useToast();
@@ -97,7 +103,7 @@ function DashboardPage() {
       </Box>
       <Box bg="white" p={4} borderRadius="lg" boxShadow="base">
         <Table variant="simple">
-          <Thead><Tr><Th>Title</Th><Th>Status</Th><Th>Created At</Th><Th></Th></Tr></Thead>
+          <Thead><Tr><Th>Title</Th><Th>Status</Th><Th>Created At</Th><Th>Published At</Th></Tr></Thead>
             <Tbody>
             {surveys.map((survey: {
               created_at: string;
@@ -111,36 +117,59 @@ function DashboardPage() {
                 {/* <Td fontWeight="medium">{survey.survey_title}</Td> */}
                 <Td
                     fontWeight="medium"
-                    onClick={() => navigate({ to: '/surveys/$surveyId/', params: { surveyId: survey.survey_id } })}
+                    onClick={() => navigate({ to: '/surveys/$surveyId/preview', params: { surveyId: survey.survey_id } })}
                     cursor="pointer"
                     _hover={{ color: 'blue.600', textDecoration: 'underline' }}
                   >
                     {survey.survey_title}
                   </Td>
-              <Td>{survey.status}</Td>
-              <Td>{new Date(survey.created_at).toLocaleDateString()}</Td>
+              <Td>
+                <Badge
+                  colorScheme={
+                    survey.status === 'published'
+                      ? 'green'
+                      : survey.status === 'scheduled'
+                      ? 'blue'
+                      : 'yellow'
+                  }
+                  variant="subtle"
+                  fontSize="xs"
+                  px={3}
+                  py={1}
+                  borderRadius="md"
+                >
+                  {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)}
+                </Badge>
+              </Td>
+              <Td>{new Date(survey.created_at).toLocaleString()}</Td>
+              <Td>{survey.publish_date?new Date(survey.publish_date).toLocaleString():'-'}</Td>
                 <Td>
+
                                       <HStack spacing={2} w='100%' justifyContent="flex-end">
-                      <Button size="sm" variant="ghost" colorScheme="blue" leftIcon={<Edit size={16}/>} onClick={() => navigate({ to: '/surveys/$surveyId/edit', params: { surveyId: survey.survey_id } })}>
+                             <Button size="sm" variant="ghost" colorScheme="green" leftIcon={<BarChart2 size={16}/>} onClick={() => navigate({ to: '/surveys/$surveyId/submissions', params: { surveyId: survey.survey_id } })}>
+                        Submissions
+                      </Button>
+                    <Button size="sm" variant="ghost" colorScheme="blue" leftIcon={<Edit size={16} />} onClick={() => navigate({ to: '/surveys/$surveyId/edit', params: { surveyId: survey.survey_id } })}>
                         Edit
                       </Button>
                       <Button size="sm" variant="ghost" colorScheme="red" leftIcon={<Trash2 size={16}/>} onClick={() => handleDeleteClick(survey.survey_id)}>
                         Delete
                     </Button>
-                     <Button
-                size="sm"
-                variant="ghost"
-                colorScheme="blue"
-                rightIcon={<ChevronRight size={16} />}
-                onClick={() =>
-                  navigate({
-                  to: '/surveys/$surveyId/',
-                  params: { surveyId: survey.survey_id },
-                  })
-                }
-                >
-                View
-                </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="blue"
+                      rightIcon={<ChevronRight size={16} />}
+                      onClick={() =>
+                        navigate({
+                          to: '/surveys/$surveyId/viewForm',
+                          params: { surveyId: survey.survey_id },
+                        })
+                      }
+                      isDisabled={survey.status !== 'published'}
+                    >
+                      View Form
+                    </Button>
                     </HStack>
 
 
@@ -152,7 +181,7 @@ function DashboardPage() {
         <Box display="flex" justifyContent="flex-end" alignItems="center" mt={4} gap={2}>
           <Button
             size="sm"
-            onClick={() => setPage(page - 1)}
+            onClick={() => navigate({ search: { page: String(page - 1) } })}
             isDisabled={page === 1}
           >
             Prev
@@ -162,7 +191,7 @@ function DashboardPage() {
           </Box>
           <Button
             size="sm"
-            onClick={() => setPage(page + 1)}
+            onClick={() => navigate({ search: { page: String(page + 1) } })}
             isDisabled={page >= totalPages}
           >
             Next
