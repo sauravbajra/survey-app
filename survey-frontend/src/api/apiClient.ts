@@ -20,6 +20,11 @@ interface SubmissionAnswer {
     answer_value: string | string[];
 }
 
+interface SurveyFilters {
+    status?: string;
+    is_external?: string;
+}
+
 const apiClient = axios.create({ baseURL });
 apiClient.interceptors.request.use(
   (config) => {
@@ -56,11 +61,27 @@ export const api = {
   refreshToken: () => apiClient.post('/refresh'),
 
   // --- Surveys ---
-  getSurveys: (page = 1, per_page = 10) => apiClient.get(`/surveys/?page=${page}&per_page=${per_page}`),
+  // getSurveys: (page = 1, per_page = 10) => apiClient.get(`/surveys/?page=${page}&per_page=${per_page}`),
+    getSurveys: (page = 1, per_page = 10, filters: SurveyFilters = {}) => {
+    const params = new URLSearchParams({
+        page: String(page),
+        per_page: String(per_page),
+    });
+
+    if (filters.status && filters.status !== 'all') {
+        params.append('status', filters.status);
+    }
+    if (filters.is_external && filters.is_external !== 'all') {
+        params.append('is_external', filters.is_external);
+    }
+
+    return apiClient.get(`/surveys/`, { params });
+  },
   getSurveyById: (surveyId: string) => apiClient.get(`/surveys/${surveyId}`),
   createSurvey: (data: SurveyData) => apiClient.post('/surveys/', data),
   updateSurvey: (surveyId: string, data: Partial<SurveyData>) => apiClient.put(`/surveys/${surveyId}`, data),
   deleteSurvey: (surveyId: string) => apiClient.delete(`/surveys/${surveyId}`),
+  publishSurvey: (surveyId: string, publish_date?: string | null) => apiClient.patch(`/surveys/${surveyId}/publish`, { publish_date }),
 
   // --- Questions ---
   createQuestion: (surveyId: string, data: QuestionData) => apiClient.post(`/surveys/${surveyId}/questions`, data),

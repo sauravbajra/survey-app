@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Box,
   Button,
-  FormControl,
-  FormLabel,
   Heading,
   Input,
   useToast,
@@ -18,21 +16,40 @@ import {
   Radio,
   Select,
   Flex,
-  Center
+  Center,
+  SlideFade
 } from '@chakra-ui/react';
 import { api } from '../../../api/apiClient';
 import LoadingSpinner from '../../../components/LoadingSpinner';
+import { ArrowRight, CircleUserRound } from 'lucide-react';
 
 export const Route = createFileRoute('/surveys/$surveyId/viewForm')({
   component: PublicSurveyPage,
 });
 
+// Define types for the questions and conversation history
+type Question = {
+  question_id: number;
+  title: string;
+  type: 'TEXT' | 'MULTIPLE_CHOICE' | 'CHECKBOX' | 'DROPDOWN';
+  options?: string[];
+};
+
+type ConversationMessage = {
+    type: 'question' | 'answer';
+    content: any;
+    question_title?: string; // For answers, to show what was asked
+};
+
 function PublicSurveyPage() {
   const { surveyId } = Route.useParams();
   const toast = useToast();
+
+  // State for the conversational flow
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<number, string>>({});
+  const [conversation, setConversation] = useState<ConversationMessage[]>([]);
 
   const { data: surveyData, isLoading, isError } = useQuery({
     queryKey: ['publicSurvey', surveyId],
@@ -43,13 +60,6 @@ function PublicSurveyPage() {
     mutationFn: (submissionData: any[]) => api.submitPublicSurvey(surveyId, submissionData),
     onSuccess: () => {
       setIsSubmitted(true);
-      toast({
-        title: 'Submission successful.',
-        description: "Thank you for your response!",
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
     },
     onError: (error: any) => {
       toast({
@@ -62,130 +72,152 @@ function PublicSurveyPage() {
     },
   });
 
+  const survey = surveyData?.data;
+  const currentQuestion: Question | undefined = survey?.questions[currentQuestionIndex];
+
+  // Initialize the conversation with the first question when the survey loads
+  useEffect(() => {
+      if (survey?.questions?.length > 0 && conversation.length === 0) {
+          setConversation([{ type: 'question', content: survey.questions[0] }]);
+      }
+  }, [survey, conversation.length]);
+
   const handleAnswerChange = (questionId: number, value: any) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const errors: Record<number, string> = {};
-    if (survey && survey.questions) {
-      survey.questions.forEach((q: Question) => {
-        if (q.type === 'CHECKBOX') {
-          const val = answers[q.question_id];
-          if (!val || (Array.isArray(val) && val.length === 0)) {
-            errors[q.question_id] = 'Please select at least one option.';
-          }
-        }
-      });
+  const handleNextQuestion = () => {
+    if (!currentQuestion) return;
+
+    const currentAnswer = answers[currentQuestion.question_id];
+    if (currentAnswer === undefined || currentAnswer === '' || (Array.isArray(currentAnswer) && currentAnswer.length === 0)) {
+        toast({ title: "An answer is required.", status: 'warning', duration: 3000, isClosable: true });
+        return;
     }
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      toast({
-        title: 'Form Error',
-        description: 'Please answer all required questions.',
-        status: 'error',
-        duration: 4000,
-        isClosable: true,
-      });
-      return;
+
+    const newAnswerMessage: ConversationMessage = {
+        type: 'answer',
+        content: currentAnswer,
+        question_title: currentQuestion.title
+    };
+
+    // If it's the last question, submit the survey
+    if (currentQuestionIndex === survey.questions.length - 1) {
+      setConversation(prev => [...prev, newAnswerMessage]);
+      const submissionPayload = Object.entries(answers).map(([questionId, answerValue]) => ({
+        question_id: parseInt(questionId, 10),
+        answer_value: answerValue,
+      }));
+      submissionMutation.mutate(submissionPayload);
+    } else {
+      // Otherwise, add the answer and the next question to the conversation
+      const nextQuestion = survey.questions[currentQuestionIndex + 1];
+      setConversation(prev => [...prev, newAnswerMessage, { type: 'question', content: nextQuestion }]);
+      setCurrentQuestionIndex(prev => prev + 1);
     }
-    const submissionPayload = Object.entries(answers).map(([questionId, answerValue]) => ({
-      question_id: parseInt(questionId, 10),
-      answer_value: answerValue,
-    }));
-    submissionMutation.mutate(submissionPayload);
+  };
+
+  const renderAnswerForDisplay = (answerContent: any) => {
+      if (Array.isArray(answerContent)) {
+          return answerContent.join(', ');
+      }
+      return answerContent.toString();
+  }
+
+  const renderQuestionInput = (question: Question) => {
+    const questionId = question.question_id;
+    switch (question.type) {
+      case 'TEXT':
+        return <Input placeholder="Type your answer here..." value={answers[questionId] || ''} onChange={(e) => handleAnswerChange(questionId, e.target.value)} />;
+      case 'MULTIPLE_CHOICE':
+        return <RadioGroup value={answers[questionId]} onChange={(value) => handleAnswerChange(questionId, value)}><Stack>{question.options?.map((opt: string) => <Radio key={opt} value={opt}>{opt}</Radio>)}</Stack></RadioGroup>;
+      case 'CHECKBOX':
+        return <CheckboxGroup value={answers[questionId] || []} onChange={(values) => handleAnswerChange(questionId, values)}><Stack>{question.options?.map((opt: string) => <Checkbox key={opt} value={opt}>{opt}</Checkbox>)}</Stack></CheckboxGroup>;
+      case 'DROPDOWN':
+          return <Select placeholder="Select an option" value={answers[questionId] || ''} onChange={(e) => handleAnswerChange(questionId, e.target.value)}>{question.options?.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}</Select>;
+      default:
+        return null;
+    }
   };
 
   if (isLoading) return <LoadingSpinner />;
 
   if (isError) {
     return (
-      <Center minH="100vh" bg="gray.50">
-        <Box p={8} textAlign="center">
-          <Heading size="lg" color="gray.600">Survey Not Available</Heading>
-          <Text mt={4}>This survey might not be published or the link is incorrect.</Text>
-        </Box>
+      <Center minH="100vh" >
+        <Box p={8} textAlign="center"><Heading size="lg" color="gray.600">Survey Not Available</Heading><Text mt={4}>This survey might not be published or the link is incorrect.</Text></Box>
       </Center>
     );
   }
 
   if (isSubmitted) {
-      return (
-        <Center minH="100vh" bg="gray.50">
-            <Box p={8} textAlign="center">
-                <Heading size="xl" color="green.500">Thank You!</Heading>
-                <Text mt={4}>Your response has been recorded.</Text>
-            </Box>
-        </Center>
+    return (
+         <Flex minH="100vh" direction="column" justify="center"  p={4}>
+      <Box bg="white" p={8} borderRadius="lg" boxShadow="lg" w="full" maxW="xl" mx="auto">
+        <Center >
+            <Box p={8} textAlign="center"><Heading size="xl" color="green.500">Thank You!</Heading><Text mt={4}>Your response has been recorded.</Text></Box>
+          </Center>
+          </Box>
+      </Flex>
       );
   }
 
-  const survey = surveyData?.data;
-
-  type Question = {
-    question_id: number;
-    title: string;
-    type: 'TEXT' | 'MULTIPLE_CHOICE' | 'CHECKBOX' | 'DROPDOWN';
-    options?: string[];
-  };
-
-  const renderQuestion = (question: Question) => {
-    switch (question.type) {
-      case 'TEXT':
-        return <Input onChange={(e) => handleAnswerChange(question.question_id, e.target.value)} />;
-      case 'MULTIPLE_CHOICE':
-        return (
-          <RadioGroup onChange={(value) => handleAnswerChange(question.question_id, value)}>
-            <Stack>
-              {question.options && question.options.map((opt: string) => <Radio key={opt} value={opt}>{opt}</Radio>)}
-            </Stack>
-          </RadioGroup>
-        );
-      case 'CHECKBOX':
-        return (
-          <>
-            <CheckboxGroup onChange={(values) => handleAnswerChange(question.question_id, values)}>
-              <Stack>
-                {question.options && question.options.map((opt: string) => <Checkbox key={opt} value={opt}>{opt}</Checkbox>)}
-              </Stack>
-            </CheckboxGroup>
-            {formErrors[question.question_id] && (
-              <Text color="red.500" fontSize="sm" mt={1}>{formErrors[question.question_id]}</Text>
-            )}
-          </>
-        );
-      case 'DROPDOWN':
-          return (
-              <Select placeholder="Select option" onChange={(e) => handleAnswerChange(question.question_id, e.target.value)}>
-                  {question.options && question.options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
-              </Select>
-          );
-      default:
-        return null;
-    }
-  };
-
   return (
-    <Flex minH="100vh" align="center" justify="center" bg="gray.50" p={4}>
-      <Box as="form" onSubmit={handleSubmit} bg="white" p={8} borderRadius="lg" boxShadow="lg" w="full" maxW="2xl">
-        <VStack spacing={8} align="stretch">
-          <Box textAlign="center">
-            <Heading size="xl">{survey.survey_title}</Heading>
+    <Flex minH="100vh" direction="column" justify="center"  p={4}>
+      <Box bg="white" p={8} borderRadius="lg" boxShadow="lg" w="full" maxW="xl" mx="auto">
+        <VStack spacing={4} align="stretch">
+          <Box textAlign="center" mb={4}>
+            <Heading size="lg">{survey.survey_title}</Heading>
           </Box>
-          {survey.questions.map((q: Question) => (
-            <FormControl key={q.question_id} isRequired={q.type !== 'CHECKBOX'}>
-              <FormLabel fontWeight="bold">{q.title}</FormLabel>
-              {renderQuestion(q)}
-            </FormControl>
-          ))}
-          <Button
-            type="submit"
-            colorScheme="blue"
-            isLoading={submissionMutation.isPending}
-          >
-            Submit Response
-          </Button>
+
+          {/* Chat History */}
+          <VStack spacing={4} align="stretch" w="full" minH="300px" overflowY="auto" p={4} bg="gray.50" borderRadius="md">
+            {conversation.map((message, index) => (
+              <Flex key={index} justify={message.type === 'question' ? 'flex-start' : 'flex-end'} alignItems="flex-end">
+                {message.type === 'question' ?
+                  <Box p={1} rounded="full" bg="green.300" color="white"  mr={2}>
+                    <CircleUserRound size={24} /></Box> : null}
+
+                    <Box
+                        bg={message.type === 'question' ? 'gray.200' : 'blue.500'}
+                        color={message.type === 'question' ? 'black' : 'white'}
+                        px={4} py={2}
+                        borderRadius="lg"
+                  maxW="80%"
+                        >
+                        {message.type === 'question' ?
+                            <Text fontWeight="bold">{message.content.title}</Text> :
+                            <Text>{renderAnswerForDisplay(message.content)}</Text>
+                        }
+                    </Box>
+                </Flex>
+            ))}
+          </VStack>
+
+          {/* Current Question Input */}
+          <Box>
+            {currentQuestion && (
+                <SlideFade key={currentQuestionIndex} in={true} offsetY="20px">
+                    <Box pt={4} w="full">
+                        {renderQuestionInput(currentQuestion)}
+                    </Box>
+                </SlideFade>
+            )}
+          </Box>
+
+          <Flex justify="flex-end">
+            {survey.questions && survey.questions.length > 0 && (
+                <Button
+                  rightIcon={<ArrowRight size={16} />}
+                  colorScheme="blue"
+                  onClick={handleNextQuestion}
+                  isLoading={submissionMutation.isPending}
+                  isDisabled={!currentQuestion}
+                >
+                  {currentQuestionIndex === survey.questions.length - 1 ? 'Submit' : 'Next'}
+                </Button>
+            )}
+          </Flex>
         </VStack>
       </Box>
     </Flex>

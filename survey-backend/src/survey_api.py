@@ -49,12 +49,42 @@ def create_survey():
 @surveys_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_all_surveys():
+    """
+    Retrieves a paginated and filterable list of all surveys.
+    Accepts query parameters for pagination, status, and is_external.
+    """
+    # --- Pagination Parameters ---
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
 
-    surveys_pagination = Survey.query.order_by(Survey.created_at.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
+    # --- Filter Parameters ---
+    status_filter = request.args.get('status', 'all', type=str)
+    is_external_filter = request.args.get('is_external', 'all', type=str)
+
+    # Start with a base query
+    query = Survey.query
+
+    # Apply status filter if it's not 'all'
+    if status_filter != 'all':
+        try:
+            # Validate and convert string to Enum member
+            status_enum = SurveyStatus(status_filter)
+            query = query.filter(Survey.status == status_enum)
+        except ValueError:
+            return jsonify({"status": "error", "message": f"Invalid status value: {status_filter}"}), 400
+
+    # Apply is_external filter if it's not 'all'
+    if is_external_filter != 'all':
+        if is_external_filter.lower() == 'true':
+            query = query.filter(Survey.is_external == True)
+        elif is_external_filter.lower() == 'false':
+            query = query.filter(Survey.is_external == False)
+
+    # Apply ordering before pagination
+    query = query.order_by(Survey.created_at.desc())
+
+    # Execute the paginated query
+    surveys_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
     results = [survey.to_dict() for survey in surveys_pagination.items]
 
@@ -88,6 +118,23 @@ def create_question_for_survey(survey_id):
     db.session.add(new_question)
     db.session.commit()
     return jsonify(new_question.to_dict()), 201
+
+@surveys_bp.route('/<string:survey_id>/publish', methods=['PATCH'])
+@jwt_required()
+def publish_survey(survey_id):
+    """Updates a survey's status to 'published'."""
+    survey = Survey.query.get_or_404(survey_id)
+
+    if survey.is_external:
+        return jsonify({"status": "error", "message": "External surveys cannot be modified."}), 403
+
+    survey.status = SurveyStatus.PUBLISHED
+    # Clear the publish date as it's no longer needed
+    survey.publish_date = None
+
+    db.session.commit()
+    return jsonify(survey.to_dict())
+
 
 @surveys_bp.route('/<string:survey_id>', methods=['PUT'])
 @jwt_required()

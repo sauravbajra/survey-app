@@ -50,7 +50,7 @@ def create_app(config_class=Config):
         resources={r"/*": {"origins": "http://localhost:5173"}},
         supports_credentials=True,
         # Add the methods and headers your frontend needs
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization"]
     )
     # Initialize extensions
@@ -60,7 +60,7 @@ def create_app(config_class=Config):
 
         # --- CONFIGURE AND START SCHEDULER ---
     scheduler = BackgroundScheduler(daemon=True)
-    scheduler.add_job(publish_scheduled_surveys, 'interval', minutes=5, args=[app])
+    scheduler.add_job(publish_scheduled_surveys, 'interval', minutes=1, args=[app])
     scheduler.start()
 
     # Import and register blueprints

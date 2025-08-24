@@ -1,0 +1,4 @@
+Customer Feedback Survey Q3
+How would you rate our service?,MULTIPLE_CHOICE,"Excellent,Good,Fair,Poor"
+What feature do you use the most?,TEXT
+Which new features would you like to see?,CHECKBOX,"Feature A,Feature B,Feature C,Feature D"

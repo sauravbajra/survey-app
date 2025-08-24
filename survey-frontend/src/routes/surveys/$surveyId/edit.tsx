@@ -136,7 +136,7 @@ function EditSurveyPage() {
       });
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
       queryClient.invalidateQueries({ queryKey: ['survey', surveyId] });
-      navigate({ to: '/surveys/$surveyId/preview', params: { surveyId } });
+      navigate({ to: '/surveys/$surveyId/viewDetails', params: { surveyId } });
     },
     onError: (error: any) => {
       toast({
@@ -199,7 +199,7 @@ function EditSurveyPage() {
             toast({ title: "Please select a publish date to schedule.", status: 'warning', duration: 3000, isClosable: true });
             return;
         }
-        if (new Date(publishDate) <= new Date()) {
+        if (new Date(publishDate).toISOString() <= new Date().toISOString()) {
             toast({ title: "Scheduled publish date must be in the future.", status: 'warning', duration: 3000, isClosable: true });
             return;
         }
