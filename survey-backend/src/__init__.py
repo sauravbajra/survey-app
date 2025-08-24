@@ -5,6 +5,7 @@ from config import Config
 from flask_jwt_extended import JWTManager
 from apscheduler.schedulers.background import BackgroundScheduler # Import scheduler
 from datetime import datetime, timezone
+from sqlalchemy import text
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -71,7 +72,7 @@ def create_app(config_class=Config):
     @app.route('/check-db-connection', methods=['GET'])
     def health_check():
         try:
-            db.session.execute('SELECT 1')
+            db.session.execute(text('SELECT 1'))
             return {"status": "ok", "database": "connected"}, 200
         except Exception:
             return {"status": "error", "database": "disconnected"}, 503

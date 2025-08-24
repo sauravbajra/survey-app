@@ -45,10 +45,9 @@ source .venv/bin/activate
 # On Windows
 .venv\Scripts\activate
 
-# Install dependencies from requirements.txt
-uv pip install -r requirements.txt
+# Install dependencies
+uv sync
 ```
-(Note: A requirements.txt file would need to be generated with uv pip freeze > requirements.txt)
 
 ### 4. Configure Environment Variables
 
