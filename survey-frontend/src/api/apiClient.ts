@@ -81,7 +81,8 @@ export const api = {
   createSurvey: (data: SurveyData) => apiClient.post('/surveys/', data),
   updateSurvey: (surveyId: string, data: Partial<SurveyData>) => apiClient.put(`/surveys/${surveyId}`, data),
   deleteSurvey: (surveyId: string) => apiClient.delete(`/surveys/${surveyId}`),
-  publishSurvey: (surveyId: string, publish_date?: string | null) => apiClient.patch(`/surveys/${surveyId}/publish`, { publish_date }),
+  publishSurvey: (surveyId: string) => apiClient.patch(`/surveys/${surveyId}/publish`),
+  draftSurvey: (surveyId: string) => apiClient.patch(`/surveys/${surveyId}/draft`),
 
   // --- Questions ---
   createQuestion: (surveyId: string, data: QuestionData) => apiClient.post(`/surveys/${surveyId}/questions`, data),

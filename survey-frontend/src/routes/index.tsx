@@ -26,7 +26,7 @@ import {
     GridItem,
     Select,
 } from '@chakra-ui/react';
-import { Plus, Edit, Trash2, BarChart2, Upload, MoreVertical, Send, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, BarChart2, Upload, MoreVertical, Send, ExternalLink, NotepadTextDashed } from 'lucide-react';
 import { useState } from 'react';
 import { api } from '../api/apiClient';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -108,6 +108,28 @@ function DashboardPage() {
       onError: (error: any) => {
           toast({
               title: 'Publishing failed.',
+              description: error.response?.data?.message || 'An unexpected error occurred.',
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+          });
+      }
+  });
+    const draftMutation = useMutation({
+      mutationFn: (surveyId: string) => api.draftSurvey(surveyId),
+      onSuccess: () => {
+          toast({
+              title: 'Survey moved to draft.',
+              description: 'The survey is now in draft status.',
+              status: 'success',
+              duration: 3000,
+              isClosable: true,
+          });
+          queryClient.invalidateQueries({ queryKey: ['surveys'] });
+      },
+      onError: (error: any) => {
+          toast({
+              title: 'Move to Draft failed.',
               description: error.response?.data?.message || 'An unexpected error occurred.',
               status: 'error',
               duration: 5000,
@@ -277,6 +299,15 @@ function DashboardPage() {
                           <MenuItem icon={<Edit size={16} />} onClick={() => navigate({ to: '/surveys/$surveyId/edit', params: { surveyId: survey.survey_id } })}>
                             Edit Survey
                           </MenuItem>
+                          {survey.status === 'published' && (
+                            <MenuItem
+                              icon={<NotepadTextDashed size={16} />}
+                              onClick={() => draftMutation.mutate(survey.survey_id)}
+                              isDisabled={draftMutation.isPending}
+                            >
+                              Move to Draft
+                            </MenuItem>
+                          )}
                           {survey.status === 'draft' && (
                             <MenuItem
                               icon={<Send size={16} />}

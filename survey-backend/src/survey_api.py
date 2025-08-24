@@ -135,6 +135,19 @@ def publish_survey(survey_id):
     db.session.commit()
     return jsonify(survey.to_dict())
 
+@surveys_bp.route('/<string:survey_id>/draft', methods=['PATCH'])
+@jwt_required()
+def move_survey_to_drafts(survey_id):
+    """Updates a survey's status to 'draft'."""
+    survey = Survey.query.get_or_404(survey_id)
+
+    if survey.is_external:
+        return jsonify({"status": "error", "message": "External surveys cannot be modified."}), 403
+
+    survey.status = SurveyStatus.DRAFT
+
+    db.session.commit()
+    return jsonify(survey.to_dict())
 
 @surveys_bp.route('/<string:survey_id>', methods=['PUT'])
 @jwt_required()
