@@ -15,7 +15,9 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SurveysCreateRouteImport } from './routes/surveys/create'
 import { Route as SurveysLayoutRouteImport } from './routes/surveys/_layout'
-import { Route as SurveysSurveyIdRouteImport } from './routes/surveys/$surveyId'
+import { Route as SurveysSurveyIdViewFormRouteImport } from './routes/surveys/$surveyId/viewForm'
+import { Route as SurveysSurveyIdSubmissionsRouteImport } from './routes/surveys/$surveyId/submissions'
+import { Route as SurveysSurveyIdPreviewRouteImport } from './routes/surveys/$surveyId/preview'
 import { Route as SurveysSurveyIdEditRouteImport } from './routes/surveys/$surveyId/edit'
 
 const SurveysRouteImport = createFileRoute('/surveys')()
@@ -44,75 +46,97 @@ const SurveysLayoutRoute = SurveysLayoutRouteImport.update({
   id: '/_layout',
   getParentRoute: () => SurveysRoute,
 } as any)
-const SurveysSurveyIdRoute = SurveysSurveyIdRouteImport.update({
-  id: '/surveys/$surveyId',
-  path: '/surveys/$surveyId',
-  getParentRoute: () => rootRouteImport,
+const SurveysSurveyIdViewFormRoute = SurveysSurveyIdViewFormRouteImport.update({
+  id: '/$surveyId/viewForm',
+  path: '/$surveyId/viewForm',
+  getParentRoute: () => SurveysRoute,
+} as any)
+const SurveysSurveyIdSubmissionsRoute =
+  SurveysSurveyIdSubmissionsRouteImport.update({
+    id: '/$surveyId/submissions',
+    path: '/$surveyId/submissions',
+    getParentRoute: () => SurveysRoute,
+  } as any)
+const SurveysSurveyIdPreviewRoute = SurveysSurveyIdPreviewRouteImport.update({
+  id: '/$surveyId/preview',
+  path: '/$surveyId/preview',
+  getParentRoute: () => SurveysRoute,
 } as any)
 const SurveysSurveyIdEditRoute = SurveysSurveyIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => SurveysSurveyIdRoute,
+  id: '/$surveyId/edit',
+  path: '/$surveyId/edit',
+  getParentRoute: () => SurveysRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/surveys/$surveyId': typeof SurveysSurveyIdRouteWithChildren
   '/surveys': typeof SurveysLayoutRoute
   '/surveys/create': typeof SurveysCreateRoute
   '/surveys/$surveyId/edit': typeof SurveysSurveyIdEditRoute
+  '/surveys/$surveyId/preview': typeof SurveysSurveyIdPreviewRoute
+  '/surveys/$surveyId/submissions': typeof SurveysSurveyIdSubmissionsRoute
+  '/surveys/$surveyId/viewForm': typeof SurveysSurveyIdViewFormRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/surveys/$surveyId': typeof SurveysSurveyIdRouteWithChildren
   '/surveys': typeof SurveysLayoutRoute
   '/surveys/create': typeof SurveysCreateRoute
   '/surveys/$surveyId/edit': typeof SurveysSurveyIdEditRoute
+  '/surveys/$surveyId/preview': typeof SurveysSurveyIdPreviewRoute
+  '/surveys/$surveyId/submissions': typeof SurveysSurveyIdSubmissionsRoute
+  '/surveys/$surveyId/viewForm': typeof SurveysSurveyIdViewFormRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/surveys/$surveyId': typeof SurveysSurveyIdRouteWithChildren
   '/surveys': typeof SurveysRouteWithChildren
   '/surveys/_layout': typeof SurveysLayoutRoute
   '/surveys/create': typeof SurveysCreateRoute
   '/surveys/$surveyId/edit': typeof SurveysSurveyIdEditRoute
+  '/surveys/$surveyId/preview': typeof SurveysSurveyIdPreviewRoute
+  '/surveys/$surveyId/submissions': typeof SurveysSurveyIdSubmissionsRoute
+  '/surveys/$surveyId/viewForm': typeof SurveysSurveyIdViewFormRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
-    | '/surveys/$surveyId'
     | '/surveys'
     | '/surveys/create'
     | '/surveys/$surveyId/edit'
+    | '/surveys/$surveyId/preview'
+    | '/surveys/$surveyId/submissions'
+    | '/surveys/$surveyId/viewForm'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
-    | '/surveys/$surveyId'
     | '/surveys'
     | '/surveys/create'
     | '/surveys/$surveyId/edit'
+    | '/surveys/$surveyId/preview'
+    | '/surveys/$surveyId/submissions'
+    | '/surveys/$surveyId/viewForm'
   id:
     | '__root__'
     | '/'
     | '/login'
-    | '/surveys/$surveyId'
     | '/surveys'
     | '/surveys/_layout'
     | '/surveys/create'
     | '/surveys/$surveyId/edit'
+    | '/surveys/$surveyId/preview'
+    | '/surveys/$surveyId/submissions'
+    | '/surveys/$surveyId/viewForm'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
-  SurveysSurveyIdRoute: typeof SurveysSurveyIdRouteWithChildren
   SurveysRoute: typeof SurveysRouteWithChildren
 }
 
@@ -153,43 +177,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SurveysLayoutRouteImport
       parentRoute: typeof SurveysRoute
     }
-    '/surveys/$surveyId': {
-      id: '/surveys/$surveyId'
-      path: '/surveys/$surveyId'
-      fullPath: '/surveys/$surveyId'
-      preLoaderRoute: typeof SurveysSurveyIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/surveys/$surveyId/viewForm': {
+      id: '/surveys/$surveyId/viewForm'
+      path: '/$surveyId/viewForm'
+      fullPath: '/surveys/$surveyId/viewForm'
+      preLoaderRoute: typeof SurveysSurveyIdViewFormRouteImport
+      parentRoute: typeof SurveysRoute
+    }
+    '/surveys/$surveyId/submissions': {
+      id: '/surveys/$surveyId/submissions'
+      path: '/$surveyId/submissions'
+      fullPath: '/surveys/$surveyId/submissions'
+      preLoaderRoute: typeof SurveysSurveyIdSubmissionsRouteImport
+      parentRoute: typeof SurveysRoute
+    }
+    '/surveys/$surveyId/preview': {
+      id: '/surveys/$surveyId/preview'
+      path: '/$surveyId/preview'
+      fullPath: '/surveys/$surveyId/preview'
+      preLoaderRoute: typeof SurveysSurveyIdPreviewRouteImport
+      parentRoute: typeof SurveysRoute
     }
     '/surveys/$surveyId/edit': {
       id: '/surveys/$surveyId/edit'
-      path: '/edit'
+      path: '/$surveyId/edit'
       fullPath: '/surveys/$surveyId/edit'
       preLoaderRoute: typeof SurveysSurveyIdEditRouteImport
-      parentRoute: typeof SurveysSurveyIdRoute
+      parentRoute: typeof SurveysRoute
     }
   }
 }
 
-interface SurveysSurveyIdRouteChildren {
-  SurveysSurveyIdEditRoute: typeof SurveysSurveyIdEditRoute
-}
-
-const SurveysSurveyIdRouteChildren: SurveysSurveyIdRouteChildren = {
-  SurveysSurveyIdEditRoute: SurveysSurveyIdEditRoute,
-}
-
-const SurveysSurveyIdRouteWithChildren = SurveysSurveyIdRoute._addFileChildren(
-  SurveysSurveyIdRouteChildren,
-)
-
 interface SurveysRouteChildren {
   SurveysLayoutRoute: typeof SurveysLayoutRoute
   SurveysCreateRoute: typeof SurveysCreateRoute
+  SurveysSurveyIdEditRoute: typeof SurveysSurveyIdEditRoute
+  SurveysSurveyIdPreviewRoute: typeof SurveysSurveyIdPreviewRoute
+  SurveysSurveyIdSubmissionsRoute: typeof SurveysSurveyIdSubmissionsRoute
+  SurveysSurveyIdViewFormRoute: typeof SurveysSurveyIdViewFormRoute
 }
 
 const SurveysRouteChildren: SurveysRouteChildren = {
   SurveysLayoutRoute: SurveysLayoutRoute,
   SurveysCreateRoute: SurveysCreateRoute,
+  SurveysSurveyIdEditRoute: SurveysSurveyIdEditRoute,
+  SurveysSurveyIdPreviewRoute: SurveysSurveyIdPreviewRoute,
+  SurveysSurveyIdSubmissionsRoute: SurveysSurveyIdSubmissionsRoute,
+  SurveysSurveyIdViewFormRoute: SurveysSurveyIdViewFormRoute,
 }
 
 const SurveysRouteWithChildren =
@@ -198,7 +232,6 @@ const SurveysRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
-  SurveysSurveyIdRoute: SurveysSurveyIdRouteWithChildren,
   SurveysRoute: SurveysRouteWithChildren,
 }
 export const routeTree = rootRouteImport

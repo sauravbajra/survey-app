@@ -7,7 +7,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
     <Container maxW={{ base: '100%' }}>
       <Flex>
         <Sidebar />
-        <Container  maxW={{ base: '100%', md: '6xl' }} ml={{ base: 0, md: '250px' }} p={8} w="100%">
+        <Container  maxW={{ base: '100%', md: '9xl' }} ml={{ base: 0, md: '250px' }} p={8} w="100%">
           {children}
         </Container>
       </Flex>
