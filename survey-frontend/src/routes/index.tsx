@@ -212,7 +212,7 @@ function DashboardPage() {
     <>
       <Box>
         <Flex justify="space-between" align="center" mb={6}>
-          <Heading size="lg">All sssSurveys</Heading>
+          <Heading size="lg">All Surveys</Heading>
           <HStack spacing={3}>
             <Button
               colorScheme="blue"
