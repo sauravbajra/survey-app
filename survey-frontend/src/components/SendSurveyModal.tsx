@@ -36,7 +36,7 @@ const SendSurveyModal: React.FC<SendSurveyModalProps> = ({
   const [emails, setEmails] = useState('');
   const toast = useToast();
   const publicUrl = surveyId
-    ? `${window.location.origin}/public/surveys/${surveyId}`
+    ? `${window.location.origin}/surveys/${surveyId}/viewForm`
     : '';
 
   const mutation = useMutation({
