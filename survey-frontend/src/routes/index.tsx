@@ -189,6 +189,7 @@ function DashboardPage() {
           <HStack>
             <Button
               colorScheme='blue'
+              bg='white'
               variant="outline"
               leftIcon={<Upload size={16} />}
               onClick={onImportOpen}

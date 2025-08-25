@@ -24,7 +24,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   onConfirm,
   isLoading,
   title = "Delete Survey",
-  body = "Are you sure? This action cannot be undone."
+  body = "Deleting the survey will delete all data associated with it (questions, submissions, analytics, etc.). This action cannot be undone."
 }) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
 

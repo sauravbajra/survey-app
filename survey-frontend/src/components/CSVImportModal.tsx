@@ -142,7 +142,8 @@ const CsvImportModal: React.FC<CsvImportModalProps> = ({ isOpen, onClose }) => {
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4}>
-            <Text>Select a CSV file. The first line is the survey title, and subsequent lines are questions in the format: `title,type,"option1,option2"`.</Text>
+            <Text>Select a CSV file. The first line is the survey title, and subsequent lines are questions in the format: `question title, question type,"option1,option2"`.</Text>
+            <Text>To help you get started, click here to download a <a href={import.meta.env.VITE_APP_BASE_URL + '/sample-survey.csv'} download style={{ color: 'blue', textDecoration: 'underline' }}>sample CSV</a>.</Text>
             <FormControl isRequired>
               <FormLabel>CSV File</FormLabel>
               <Input type="file" accept=".csv" onChange={handleFileChange} p={1} />
