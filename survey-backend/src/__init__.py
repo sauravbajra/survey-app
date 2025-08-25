@@ -7,9 +7,11 @@ from apscheduler.schedulers.background import BackgroundScheduler # Import sched
 from datetime import datetime, timezone
 from sqlalchemy import text
 from flask_cors import CORS
+from flask_mail import Mail
 
 db = SQLAlchemy()
 migrate = Migrate()
+mail = Mail()
 
 def publish_scheduled_surveys(app):
     """
@@ -57,8 +59,9 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt = JWTManager(app)
+    mail.init_app(app)
 
-        # --- CONFIGURE AND START SCHEDULER ---
+    # --- CONFIGURE AND START SCHEDULER ---
     scheduler = BackgroundScheduler(daemon=True)
     scheduler.add_job(publish_scheduled_surveys, 'interval', minutes=1, args=[app])
     scheduler.start()

@@ -5,13 +5,15 @@ import {
   Button,
   Flex,
   FormControl,
-  FormLabel,
   Heading,
   Input,
+  InputGroup,
+  InputLeftElement,
   useToast,
   VStack,
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
+import { LockKeyhole, UserRound } from 'lucide-react';
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -67,28 +69,38 @@ function LoginPage() {
         <VStack spacing={6} as="form" onSubmit={handleSubmit}>
           <Heading size="lg">Survey Dashboard Login</Heading>
           <FormControl isRequired>
-            <FormLabel>Username</FormLabel>
-            <Input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g., testuser"
-            />
+            <InputGroup size="lg">
+              <InputLeftElement pointerEvents="none">
+                <UserRound color="grey" />
+              </InputLeftElement>
+              <Input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+              />
+            </InputGroup>
           </FormControl>
           <FormControl isRequired>
-            <FormLabel>Password</FormLabel>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="e.g., password123"
-            />
+            <InputGroup size="lg">
+              <InputLeftElement pointerEvents="none">
+                <LockKeyhole color="grey" />
+              </InputLeftElement>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                placeholder="Password"
+              />
+            </InputGroup>
           </FormControl>
           <Button
             type="submit"
             colorScheme="blue"
             width="full"
             isLoading={isLoading}
+            fontSize='lg'
           >
             Login
           </Button>

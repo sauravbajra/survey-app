@@ -34,6 +34,7 @@ import { api } from '../../../api/apiClient';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import { Edit, Share2, Trash2, ArrowLeft } from 'lucide-react';
 import DeleteConfirmationDialog from '../../../components/DeleteConfirmationDialog';
+import SendSurveyModal from '../../../components/SendSurveyModal'; // Import the modal
 import AnalyticsCharts from '../../../components/AnalyticsCharts';
 import { SubmissionRow } from '../../../components/SubmissionRow';
 
@@ -53,6 +54,11 @@ function SurveyDetailPage() {
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
   } = useDisclosure();
+  const {
+    isOpen: isSendOpen,
+    onOpen: onSendOpen,
+    onClose: onSendClose,
+  } = useDisclosure(); // State for the send modal
 
   // Fetch Survey Details directly in this component
   const {
@@ -92,29 +98,6 @@ function SurveyDetailPage() {
       });
     },
   });
-
-  const handleShareClick = () => {
-    if (survey.status !== 'published') {
-      toast({
-        title: 'Cannot share this survey.',
-        description: 'Only published surveys have a public link.',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
-    }
-    const publicUrl = `${window.location.origin}/surveys/${surveyId}/viewForm`;
-    navigator.clipboard.writeText(publicUrl).then(() => {
-      toast({
-        title: 'Public link copied!',
-        description: 'The link has been copied to your clipboard.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    });
-  };
 
   if (isLoadingSurvey) {
     return <LoadingSpinner />;
@@ -177,9 +160,8 @@ function SurveyDetailPage() {
           <HStack spacing={2}>
             <Button
               leftIcon={<Share2 size={16} />}
-              onClick={handleShareClick}
-              variant="outline"
-              bg="white"
+              onClick={onSendOpen}
+              isDisabled={survey.status !== 'published'}
             >
               Share
             </Button>
@@ -316,6 +298,11 @@ function SurveyDetailPage() {
         onClose={onDeleteClose}
         onConfirm={() => deleteMutation.mutate()}
         isLoading={deleteMutation.isPending}
+      />
+      <SendSurveyModal
+        isOpen={isSendOpen}
+        onClose={onSendClose}
+        surveyId={surveyId}
       />
     </>
   );

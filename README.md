@@ -1,6 +1,6 @@
 # Survey Application
 
-This project is a full-stack survey application designed to capture, store, and analyze survey data. It features a Flask backend, a React frontend, and a PostgreSQL database, all containerized with Docker for easy deployment and replication.
+This project is a full-stack survey application designed to create, capture, store, and analyze survey data. It features a Flask backend, a React frontend, and a PostgreSQL database, all containerized with Docker for easy deployment and replication.
 
 ## Features
 
@@ -43,12 +43,20 @@ This is the easiest way to get the entire application stack running.
     This command will build the images for the frontend and backend, and start all services.
     ```bash
     docker-compose up --build
+
+    #if you are running a newer version of docker compose, you might need to use:
+
+    docker compose up --build
     ```
 
     to run in detached mode:
 
     ```bash
     docker-compose up --build -d
+
+    #or
+
+    docker compose up --build -d
     ```
     The application will be available at `http://localhost`.
 

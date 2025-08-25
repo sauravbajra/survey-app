@@ -1,45 +1,57 @@
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-from flask import Blueprint, jsonify
+from flask_mail import Message
+from . import mail
+from .models import Survey, SurveyStatus
 from flask_jwt_extended import jwt_required
+from flask import Blueprint, jsonify, request
+import os
 
 def send_email(to_email, subject, html_content):
-    """Sends an email using the SendGrid API."""
-
-    # Your verified sender email address
-    from_email = SENDGRID_SENDER_EMAIL
-
-    message = Mail(
-        from_email=from_email,
-        to_emails=to_email,
-        subject=subject,
-        html_content=html_content
-    )
-
+    """Sends an email using the Flask-Mail extension."""
     try:
-        sendgrid_client = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sendgrid_client.send(message)
-        print(f"Email sent with status code: {response.status_code}")
-        return True
+        sender_email = os.environ.get('MAIL_USERNAME')
+        msg = Message(subject, sender=sender_email, recipients=[to_email])
+        msg.html = html_content
+        mail.send(msg)
+        print(f"Email successfully sent to {to_email}")
     except Exception as e:
         print(f"Error sending email: {e}")
-        return False
-
-
 
 email_bp = Blueprint('email_api', __name__)
 
-# ... (register and login routes) ...
-
-@email_bp.route('/test-email', methods=['POST'])
+@email_bp.route('/surveys/<string:survey_id>/send', methods=['POST'])
 @jwt_required()
-def test_email():
-    """An endpoint to test sending an email."""
-    subject = "Hello from Flask and SendGrid!"
-    recipient = "recipient-email@example.com"
-    html_content = "<strong>This is a test email sent from our survey application.</strong>"
+def send_survey_email(survey_id):
+    """
+    Sends the public link of a published survey to a list of emails.
+    """
+    survey = Survey.query.get_or_404(survey_id)
 
-    if send_email(recipient, subject, html_content):
-        return jsonify({"message": "Test email sent successfully!"}), 200
-    else:
-        return jsonify({"message": "Failed to send email."}), 500
+    if survey.status != SurveyStatus.PUBLISHED:
+        return jsonify({"status": "error", "message": "Only published surveys can be sent."}), 400
+
+    data = request.get_json()
+    emails = data.get('emails')
+
+    if not emails or not isinstance(emails, list):
+        return jsonify({"status": "error", "message": "A list of emails is required."}), 400
+
+    # Construct the public URL using a base URL from environment variables
+    frontend_url = os.environ.get('FRONTEND_BASE_URL', 'http://localhost')
+    public_link = f"{frontend_url}/surveys/{survey_id}/viewForm"
+
+    subject = f"You're invited to take the survey: {survey.survey_title}"
+    html_content = f"""
+        <h1>{survey.survey_title}</h1>
+        <p>Please provide your feedback by completing the following survey.</p>
+        <p><a href="{public_link}">Click here to start the survey</a></p>
+        <br>
+        <p>Thank you!</p>
+    """
+
+    for email in emails:
+        send_email(email, subject, html_content)
+
+    return jsonify({"status": "success", "message": f"Survey sent to {len(emails)} recipient(s)."}), 200
+
+
+

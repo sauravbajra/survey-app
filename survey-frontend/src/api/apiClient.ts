@@ -117,4 +117,8 @@ export const api = {
     apiClient.get(`/public/surveys/${surveyId}`),
   submitPublicSurvey: (surveyId: string, answers: SubmissionAnswer[]) =>
     apiClient.post(`/public/surveys/${surveyId}/submit`, answers),
+
+  // Send Email
+  sendSurveyByEmail: (surveyId: string, emailList: string[]) =>
+    apiClient.post(`/surveys/${surveyId}/send`, { emails: emailList })
 };

@@ -9,11 +9,11 @@ dependencies = [
     "flask>=3.1.2",
     "flask-cors>=6.0.1",
     "flask-jwt-extended>=4.7.1",
+    "flask-mail>=0.10.0",
     "flask-migrate>=4.1.0",
     "gunicorn>=23.0.0",
     "passlib>=1.7.4",
     "psycopg2-binary>=2.9.10",
     "python-dotenv>=1.1.1",
-    "sendgrid>=6.12.4",
     "sqlalchemy-enum-tables>=1.1.0",
 ]
