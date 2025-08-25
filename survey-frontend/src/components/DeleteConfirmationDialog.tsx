@@ -23,8 +23,8 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   onClose,
   onConfirm,
   isLoading,
-  title = "Delete Survey",
-  body = "Deleting the survey will delete all data associated with it (questions, submissions, analytics, etc.). This action cannot be undone."
+  title = 'Delete Survey',
+  body = 'Deleting the survey will delete all data associated with it (questions, submissions, analytics, etc.). This action cannot be undone.',
 }) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
 
@@ -40,16 +40,17 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
             {title}
           </AlertDialogHeader>
-
-          <AlertDialogBody>
-            {body}
-          </AlertDialogBody>
-
+          <AlertDialogBody>{body}</AlertDialogBody>
           <AlertDialogFooter>
             <Button ref={cancelRef} onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="red" onClick={onConfirm} ml={3} isLoading={isLoading}>
+            <Button
+              colorScheme="red"
+              onClick={onConfirm}
+              ml={3}
+              isLoading={isLoading}
+            >
               Delete
             </Button>
           </AlertDialogFooter>

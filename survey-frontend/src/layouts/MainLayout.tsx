@@ -7,7 +7,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
     <Box maxW={{ base: '100%' }}>
       <VStack spacing={8}>
         <Navbar />
-        <Container  maxW={{ base: '100%', md: '6xl' }} w="100%">
+        <Container maxW={{ base: '100%', md: '6xl' }} w="100%">
           {children}
         </Container>
       </VStack>

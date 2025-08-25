@@ -27,7 +27,7 @@ export const SubmissionRow = ({ submission }: { submission: any }) => {
   const { data: submissionDetails, isLoading } = useQuery({
     queryKey: ['submission', submission.submission_id],
     queryFn: () => api.getSubmissionById(submission.submission_id),
-    enabled: isOpen, // Only fetch when the row is open
+    enabled: isOpen,
   });
 
   const formatAnsers = (answer: any) => {
@@ -71,10 +71,7 @@ export const SubmissionRow = ({ submission }: { submission: any }) => {
                       {responses.map((res: any, index: number) => (
                         <Stack spacing={2} key={index}>
                           <Heading size="sm">{res.question}</Heading>
-                          {/* <Text>{JSON.stringify(res.answer)}</Text> */}
-                          <Text pl={0}>
-                             {formatAnsers(res.answer)}
-                          </Text>
+                          <Text pl={0}>{formatAnsers(res.answer)}</Text>
                         </Stack>
                       ))}
                     </Stack>

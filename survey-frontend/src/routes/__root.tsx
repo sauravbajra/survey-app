@@ -4,27 +4,26 @@ import MainLayout from '../layouts/MainLayout';
 
 export const Route = createRootRoute({
   component: RootComponent,
-  // This function runs before the route loads
+  // Allow public access to this route for submitting surveys
   beforeLoad: ({ context, location }) => {
     const auth = context.auth;
     if (location.pathname.endsWith('/viewForm')) {
-  return; // Stop here and allow access
-}
+      return;
+    }
     // If the user is not authenticated and not on the login page, redirect them
     if (!auth?.token && location.pathname !== '/login') {
       throw redirect({
         to: '/login',
         search: {
-          // You can use this to redirect back to the original page after login
           redirect: location.href,
         },
       });
     }
     // If the user is authenticated and tries to go to the login page, redirect to dashboard
     if (auth?.token && location.pathname === '/login') {
-        throw redirect({
-            to: '/',
-        });
+      throw redirect({
+        to: '/',
+      });
     }
   },
 });
@@ -32,8 +31,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   const { token } = useAuth();
 
-  // Conditionally render the main layout with the sidebar
-  // The Outlet will render the matched child route (e.g., dashboard, survey detail)
+  // Navbar is visible for authenticated users
   if (token) {
     return (
       <MainLayout>
@@ -42,6 +40,5 @@ function RootComponent() {
     );
   }
 
-  // For the login page, just render the component without the sidebar
   return <Outlet />;
 }
