@@ -151,6 +151,7 @@ function SurveyResultsPage() {
             leftIcon={<ArrowLeft size={16} />}
             onClick={() => router.history.back()}
             colorScheme="gray"
+            style={{ textDecoration: 'none' }}
           >
             Back
           </Button>

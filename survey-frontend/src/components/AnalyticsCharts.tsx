@@ -1,6 +1,18 @@
 import React from 'react';
 import { Box, Heading, List, ListItem, Text, useTheme } from '@chakra-ui/react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 
 interface AnalyticsChartsProps {
   result: {
@@ -22,7 +34,9 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ result }) => {
     theme.colors.pink[500],
   ];
 
-  const data = Object.entries(result.answer_frequencies).map(([name, value]) => ({ name, value }));
+  const data = Object.entries(result.answer_frequencies).map(
+    ([name, value]) => ({ name, value })
+  );
 
   const renderChart = () => {
     switch (result.question_type.toUpperCase()) {
@@ -31,9 +45,20 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ result }) => {
         return (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label
+              >
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={colors[index % colors.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -45,7 +70,11 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ result }) => {
       case 'CHECKBOX':
         return (
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <BarChart
+              data={data}
+              layout="vertical"
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
               <YAxis type="category" dataKey="name" width={150} />
@@ -58,13 +87,18 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ result }) => {
 
       case 'TEXT':
         return (
-            <List spacing={2} mt={2}>
-                {data.map(item => (
-                    <ListItem key={item.name} p={2} bg="gray.50" borderRadius="md">
-                        <Text>"{item.name}" <Text as="span" color="gray.500">({item.value} response(s))</Text></Text>
-                    </ListItem>
-                ))}
-            </List>
+          <List spacing={2} mt={2}>
+            {data.map((item) => (
+              <ListItem key={item.name} p={2} bg="gray.50" borderRadius="md">
+                <Text>
+                  "{item.name}"{' '}
+                  <Text as="span" color="gray.500">
+                    ({item.value} response(s))
+                  </Text>
+                </Text>
+              </ListItem>
+            ))}
+          </List>
         );
 
       default:
@@ -75,7 +109,13 @@ const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ result }) => {
   return (
     <Box p={4} borderWidth={1} borderRadius="md">
       <Heading size="sm">{result.question_title}</Heading>
-      {renderChart()}
+      {Object.keys(result.answer_frequencies).length === 0 ? (
+        <Text textAlign="center" p={4} fontWeight="semibold" color="gray.500">
+          No submissions for this question.
+        </Text>
+      ) : (
+        renderChart()
+      )}
     </Box>
   );
 };

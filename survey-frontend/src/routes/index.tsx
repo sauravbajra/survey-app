@@ -277,164 +277,189 @@ function DashboardPage() {
               </Tr>
             </Thead>
             <Tbody>
-              {surveys.map(
-                (survey: {
-                  created_at: string;
-                  is_external: boolean;
-                  publish_date: string | null;
-                  status: 'published' | 'scheduled' | 'draft';
-                  survey_id: string;
-                  survey_title: string;
-                }) => (
-                  <Tr key={survey.survey_id} _hover={{ bg: 'gray.50' }}>
-                    <Td fontWeight="medium">
-                      {survey.survey_title}
-                      {survey.is_external ? (
-                        <Tag colorScheme="purple" ml={2} size="sm">
-                          External
-                        </Tag>
-                      ) : null}
-                    </Td>
+              {surveys.length === 0 ? (
+                <Tr>
+                  <Td
+                    colSpan={5}
+                    textAlign="center"
+                    p={6}
+                    fontWeight="semibold"
+                    color="gray.500"
+                  >
+                    No surveys found.
+                  </Td>
+                </Tr>
+              ) : (
+                surveys.map(
+                  (survey: {
+                    created_at: string;
+                    is_external: boolean;
+                    publish_date: string | null;
+                    status: 'published' | 'scheduled' | 'draft';
+                    survey_id: string;
+                    survey_title: string;
+                  }) => (
+                    <Tr key={survey.survey_id} _hover={{ bg: 'gray.50' }}>
+                      <Td fontWeight="medium">
+                        {survey.survey_title}
+                        {survey.is_external ? (
+                          <Tag colorScheme="purple" ml={2} size="sm">
+                            External
+                          </Tag>
+                        ) : null}
+                      </Td>
 
-                    <Td>{new Date(survey.created_at).toLocaleString()}</Td>
-                    <Td>
-                      <Badge
-                        colorScheme={
-                          survey.status === 'published'
-                            ? 'green'
-                            : survey.status === 'scheduled'
-                              ? 'blue'
-                              : 'yellow'
-                        }
-                        variant="subtle"
-                        fontSize="xs"
-                        px={3}
-                        py={1}
-                        borderRadius="md"
-                      >
-                        {survey.status.charAt(0).toUpperCase() +
-                          survey.status.slice(1)}
-                      </Badge>
-                    </Td>
-                    <Td textAlign="center">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        colorScheme="blue"
-                        onClick={() =>
-                          navigate({
-                            to: '/surveys/$surveyId/viewDetails',
-                            params: { surveyId: survey.survey_id },
-                          })
-                        }
-                      >
-                        View Details
-                      </Button>
-                    </Td>
-                    <Td>
-                      {!survey.is_external ? (
-                        <Menu>
-                          <MenuButton
-                            as={IconButton}
-                            aria-label="Options"
-                            icon={<MoreVertical size={16} />}
-                            variant="ghost"
-                            size="sm"
-                          />
-                          <MenuList>
-                            {/* <MenuItem icon={<BarChart2 size={16} />} onClick={() => navigate({ to: '/surveys/$surveyId/viewSubmissions', params: { surveyId: survey.survey_id } })}>
+                      <Td>{new Date(survey.created_at).toLocaleString()}</Td>
+                      <Td>
+                        <Badge
+                          colorScheme={
+                            survey.status === 'published'
+                              ? 'green'
+                              : survey.status === 'scheduled'
+                                ? 'blue'
+                                : 'yellow'
+                          }
+                          variant="subtle"
+                          fontSize="xs"
+                          px={3}
+                          py={1}
+                          borderRadius="md"
+                        >
+                          {survey.status}
+                        </Badge>
+                      </Td>
+                      <Td textAlign="center">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          colorScheme="blue"
+                          onClick={() =>
+                            navigate({
+                              to: '/surveys/$surveyId/viewDetails',
+                              params: { surveyId: survey.survey_id },
+                            })
+                          }
+                        >
+                          View Details
+                        </Button>
+                      </Td>
+                      <Td>
+                        {!survey.is_external ? (
+                          <Menu>
+                            <MenuButton
+                              as={IconButton}
+                              aria-label="Options"
+                              icon={<MoreVertical size={16} />}
+                              variant="ghost"
+                              size="sm"
+                            />
+                            <MenuList>
+                              {/* <MenuItem icon={<BarChart2 size={16} />} onClick={() => navigate({ to: '/surveys/$surveyId/viewSubmissions', params: { surveyId: survey.survey_id } })}>
                             View Submissions
                           </MenuItem> */}
-                            <MenuItem
-                              icon={<Edit size={16} />}
-                              onClick={() =>
-                                navigate({
-                                  to: '/surveys/$surveyId/edit',
-                                  params: { surveyId: survey.survey_id },
-                                })
-                              }
-                            >
-                              Edit Survey
-                            </MenuItem>
-                            {survey.status === 'published' && (
                               <MenuItem
-                                icon={<NotepadTextDashed size={16} />}
-                                onClick={() =>
-                                  draftMutation.mutate(survey.survey_id)
-                                }
-                                isDisabled={draftMutation.isPending}
-                              >
-                                Move to Draft
-                              </MenuItem>
-                            )}
-                            {survey.status === 'draft' && (
-                              <MenuItem
-                                icon={<Send size={16} />}
-                                onClick={() =>
-                                  publishMutation.mutate(survey.survey_id)
-                                }
-                                isDisabled={publishMutation.isPending}
-                              >
-                                Publish Survey
-                              </MenuItem>
-                            )}
-                            {survey.status === 'published' && (
-                              <MenuItem
-                                icon={<ExternalLink size={16} />}
+                                icon={<Edit size={16} />}
                                 onClick={() =>
                                   navigate({
-                                    to: '/surveys/$surveyId/viewForm',
+                                    to: '/surveys/$surveyId/edit',
                                     params: { surveyId: survey.survey_id },
                                   })
                                 }
                               >
-                                Open Responder View
+                                Edit Survey
                               </MenuItem>
-                            )}
-                            <MenuDivider />
-                            <MenuItem
-                              icon={<Trash2 size={16} />}
-                              color="red.500"
-                              onClick={() =>
-                                handleDeleteClick(survey.survey_id)
-                              }
-                            >
-                              Delete
-                            </MenuItem>
-                          </MenuList>
-                        </Menu>
-                      ) : null}
-                    </Td>
-                  </Tr>
+                              {survey.status === 'published' && (
+                                <MenuItem
+                                  icon={<NotepadTextDashed size={16} />}
+                                  onClick={() =>
+                                    draftMutation.mutate(survey.survey_id)
+                                  }
+                                  isDisabled={draftMutation.isPending}
+                                >
+                                  Move to Draft
+                                </MenuItem>
+                              )}
+                              {survey.status === 'draft' && (
+                                <MenuItem
+                                  icon={<Send size={16} />}
+                                  onClick={() =>
+                                    publishMutation.mutate(survey.survey_id)
+                                  }
+                                  isDisabled={publishMutation.isPending}
+                                >
+                                  Publish Survey
+                                </MenuItem>
+                              )}
+                              {survey.status === 'published' && (
+                                <MenuItem
+                                  icon={<ExternalLink size={16} />}
+                                  onClick={() =>
+                                    navigate({
+                                      to: '/surveys/$surveyId/viewForm',
+                                      params: { surveyId: survey.survey_id },
+                                    })
+                                  }
+                                >
+                                  Open Responder View
+                                </MenuItem>
+                              )}
+                              <MenuDivider />
+                              <MenuItem
+                                icon={<Trash2 size={16} />}
+                                color="red.500"
+                                onClick={() =>
+                                  handleDeleteClick(survey.survey_id)
+                                }
+                              >
+                                Delete
+                              </MenuItem>
+                            </MenuList>
+                          </Menu>
+                        ) : null}
+                      </Td>
+                    </Tr>
+                  )
                 )
               )}
             </Tbody>
           </Table>
-          <Box
-            display="flex"
-            justifyContent="flex-end"
-            alignItems="center"
-            mt={4}
-            gap={2}
-          >
-            <Button
-              size="sm"
-              onClick={() => handlePageChange(page - 1)}
-              isDisabled={page <= 1}
+          <HStack justifyContent="space-between">
+            {surveys.length !== 0 ? (
+              <Box mt={2} fontSize="sm" color="gray.500" fontWeight="semibold">
+                Showing {surveys.length} of {data?.data?.total_items || 0}{' '}
+                surveys.
+              </Box>
+            ) : (
+              <Box mt={2} fontSize="sm" color="gray.500" fontWeight="semibold">
+                No surveys found.
+              </Box>
+            )}
+            <Box
+              display="flex"
+              justifyContent="flex-end"
+              alignItems="center"
+              mt={4}
+              gap={2}
             >
-              Prev
-            </Button>
-            <Box mx={2} fontWeight="medium">
-              Page {page} of {totalPages}
+              <Button
+                size="sm"
+                onClick={() => handlePageChange(page - 1)}
+                isDisabled={page <= 1}
+              >
+                Prev
+              </Button>
+              <Box mx={2} fontWeight="medium">
+                Page {page} of {totalPages}
+              </Box>
+              <Button
+                size="sm"
+                onClick={() => handlePageChange(page + 1)}
+                isDisabled={page >= totalPages}
+              >
+                Next
+              </Button>
             </Box>
-            <Button
-              size="sm"
-              onClick={() => handlePageChange(page + 1)}
-              isDisabled={page >= totalPages}
-            >
-              Next
-            </Button>
-          </Box>
+          </HStack>
         </Box>
       </Box>
       <DeleteConfirmationDialog

@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Badge,
   Box,
   Heading,
   Text,
@@ -13,25 +14,25 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  List,
   ListItem,
-  ListIcon,
   Table,
   Thead,
   Tbody,
   Tr,
   Th,
-  Td,
   VStack,
   Flex,
   Button,
   HStack,
   useDisclosure,
   useToast,
+  OrderedList,
+  Stack,
+  StackDivider,
 } from '@chakra-ui/react';
 import { api } from '../../../api/apiClient';
 import LoadingSpinner from '../../../components/LoadingSpinner';
-import { CheckCircle, Edit, Share2, Trash2, ArrowLeft } from 'lucide-react';
+import { Edit, Share2, Trash2, ArrowLeft } from 'lucide-react';
 import DeleteConfirmationDialog from '../../../components/DeleteConfirmationDialog';
 import AnalyticsCharts from '../../../components/AnalyticsCharts';
 import { SubmissionRow } from '../../../components/SubmissionRow';
@@ -118,7 +119,7 @@ function SurveyDetailPage() {
 
   if (isErrorSurvey) {
     return (
-      <Box p={4}>
+      <Box p={4} textAlign="center">
         <Heading size="lg" color="gray.500">
           Survey Not Found
         </Heading>
@@ -135,26 +136,47 @@ function SurveyDetailPage() {
     <>
       <Box>
         <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
-          <Box>
+          <VStack align="start">
             <Button
               variant="link"
               leftIcon={<ArrowLeft size={16} />}
               onClick={() => router.history.back()}
               colorScheme="gray"
-              mb={4}
+              mb={2}
+              style={{ textDecoration: 'none' }}
             >
               Back
             </Button>
-            <Heading size="lg">{survey.survey_title}</Heading>
-            <Text color="gray.500" mt={1}>
-              Status: {survey.status}
+            <Heading size="lg">
+              {survey.survey_title}{' '}
+              <Badge
+                colorScheme={
+                  survey.status === 'published'
+                    ? 'green'
+                    : survey.status === 'scheduled'
+                      ? 'blue'
+                      : 'yellow'
+                }
+                variant="subtle"
+                fontSize="xs"
+                px={3}
+                py={1}
+                borderRadius="md"
+                ml={2}
+              >
+                {survey.status}
+              </Badge>
+            </Heading>
+            <Text>
+              Created at: {new Date(survey.created_at).toLocaleString()}
             </Text>
-          </Box>
+          </VStack>
           <HStack spacing={2}>
             <Button
               leftIcon={<Share2 size={16} />}
               onClick={handleShareClick}
               variant="outline"
+              bg="white"
             >
               Share
             </Button>
@@ -200,24 +222,58 @@ function SurveyDetailPage() {
           </TabList>
           <TabPanels bg="white" borderRadius="lg" borderTopRadius={0}>
             <TabPanel>
-              <Heading size="md" mb={4}>
+              <Heading size="md" mb={6}>
                 Survey Questions
               </Heading>
-              <List spacing={3}>
-                {survey.questions.map((q: any) => (
-                  <ListItem key={q.question_id}>
-                    <ListIcon as={CheckCircle} color="green.500" />
-                    {q.title}{' '}
-                    <Text as="span" color="gray.500">
-                      ({q.type})
+              <OrderedList spacing={6}>
+                <Stack divider={<StackDivider />} spacing="3">
+                  {survey.questions.length === 0 ? (
+                    <Text
+                      textAlign="center"
+                      p={4}
+                      fontWeight="semibold"
+                      color="gray.500"
+                    >
+                      No questions available.
                     </Text>
-                  </ListItem>
-                ))}
-              </List>
+                  ) : (
+                    survey.questions.map((q: any) => (
+                      <ListItem key={q.question_id}>
+                        <Heading size="sm" mb={2}>
+                          {q.title}
+                        </Heading>
+                        <Text mb={1}>
+                          <Text fontWeight="medium" as="span">
+                            Question Type:
+                          </Text>{' '}
+                          {q.type}
+                        </Text>
+                        {q.options && q.options.length > 0 && (
+                          <Text mb={1}>
+                            <Text fontWeight="medium" as="span">
+                              Options:
+                            </Text>{' '}
+                            {q.options.join(', ')}
+                          </Text>
+                        )}
+                      </ListItem>
+                    ))
+                  )}
+                </Stack>
+              </OrderedList>
             </TabPanel>
             <TabPanel>
               {isLoadingSubmissions ? (
                 <LoadingSpinner />
+              ) : submissions && submissions.length === 0 ? (
+                <Text
+                  textAlign="center"
+                  p={4}
+                  fontWeight="semibold"
+                  color="gray.500"
+                >
+                  No submissions yet.
+                </Text>
               ) : (
                 <Table variant="simple">
                   <Thead>
@@ -244,36 +300,6 @@ function SurveyDetailPage() {
                   <Text>Total Submissions: {analytics?.total_submissions}</Text>
                   {analytics?.results.map((result: any) => (
                     <AnalyticsCharts key={result.question_id} result={result} />
-                  ))}
-                </VStack>
-              )}
-              {isLoadingAnalytics ? (
-                <LoadingSpinner />
-              ) : (
-                <VStack align="stretch" spacing={6}>
-                  <Heading size="md">Submission Analytics</Heading>
-                  <Text>Total Submissions: {analytics?.total_submissions}</Text>
-                  {analytics?.results.map((result: any) => (
-                    <Box
-                      key={result.question_id}
-                      p={4}
-                      borderWidth={1}
-                      borderRadius="md"
-                    >
-                      <Heading size="sm">{result.question_title}</Heading>
-                      <List mt={2} spacing={1}>
-                        {Object.entries(result.answer_frequencies).map(
-                          ([answer, count]) => (
-                            <ListItem key={answer}>
-                              <Text as="span" fontWeight="bold">
-                                {answer}:
-                              </Text>{' '}
-                              {count as number} response(s)
-                            </ListItem>
-                          )
-                        )}
-                      </List>
-                    </Box>
                   ))}
                 </VStack>
               )}
