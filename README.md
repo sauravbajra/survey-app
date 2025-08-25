@@ -28,8 +28,8 @@ This is the easiest way to get the entire application stack running.
 #### Steps
 1.  **Clone the Repository**
     ```bash
-    git clone <your-repository-url>
-    cd survey-app-docker
+    git clone https://github.com/sauravbajra/survey-app.git
+    cd survey-app
     ```
 
 2.  **Configure Docker Environment**
