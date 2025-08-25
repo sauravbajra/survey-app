@@ -1,130 +1,155 @@
-# Survey Webhook API
+# Survey Application
 
-This project is a Flask-based web application designed to capture, store, and analyze survey data. It provides a robust backend that can receive submissions from a webhook (such as one from Google Forms), store them in a PostgreSQL database, and expose a full RESTful API for CRUD operations and data analytics.
+This project is a full-stack survey application designed to capture, store, and analyze survey data. It features a Flask backend, a React frontend, and a PostgreSQL database, all containerized with Docker for easy deployment and replication.
 
 ## Features
 
-- **Webhook Integration**: A dedicated endpoint (`/webhook`) to receive survey submissions.
-- **RESTful API**: Full CRUD (Create, Read, Update, Delete) operations for surveys, questions, and submissions.
-- **Data Analytics**: An endpoint to get aggregated analytics, including total submissions and answer frequencies for each question.
-- **SQLAlchemy ORM**: Uses a high-level ORM for clean and secure database interactions.
-- **Database Migrations**: Powered by Flask-Migrate (Alembic) for safe, version-controlled schema changes.
-- **Structured Project**: Organized using Flask Blueprints and an application factory pattern for scalability and readability.
+- **Dockerized Environment**: Run the entire stack (Frontend, Backend, Database, Nginx Proxy) with a single command.
+- **Webhook Integration**: A dedicated endpoint (`/webhook`) to receive survey submissions from external sources.
+- **Full RESTful API**: Complete CRUD operations for surveys, questions, and submissions.
+- **Data Analytics**: An endpoint to get aggregated analytics with charts and graphs.
+- **Authentication**: Secure endpoints using JSON Web Tokens (JWT).
+- **Database Migrations**: Powered by Flask-Migrate for safe, version-controlled schema changes.
+- **Scheduled Jobs**: Automatically publish scheduled surveys using APScheduler.
 
 ---
 ## Setup and Installation
 
-Follow these instructions to get the application running on your local machine.
+You can run this project using Docker (recommended for a complete setup) or by running the frontend and backend services individually for development.
 
-### 1. Prerequisites
+### Option 1: Running with Docker (Recommended)
 
+This is the easiest way to get the entire application stack running.
+
+#### Prerequisites
+- Docker
+- Docker Compose
+
+#### Steps
+1.  **Clone the Repository**
+    ```bash
+    git clone <your-repository-url>
+    cd survey-app-docker
+    ```
+
+2.  **Configure Docker Environment**
+    Create a file named `.env.docker` in the project root by copying the example:
+    ```bash
+    cp .env.example .env.docker
+    ```
+    Update the `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` variables in this file if needed.
+
+3.  **Build and Run the Containers**
+    This command will build the images for the frontend and backend, and start all services.
+    ```bash
+    docker-compose up --build
+    ```
+    The application will be available at `http://localhost`.
+
+4.  **Run Database Migrations (First Time)**
+    The first time you start the application, you need to initialize the database schema. Open a **new terminal window** and run:
+    ```bash
+    # Initialize the migrations folder
+    docker-compose exec backend flask db init
+
+    # Generate the initial migration script
+    docker-compose exec backend flask db migrate -m "Initial migration"
+
+    # Apply the migration to the database
+    docker-compose exec backend flask db upgrade
+    ```
+    Your application is now fully set up and running.
+
+---
+### Option 2: Running the Backend Individually
+
+Use this method if you only want to work on the Flask API.
+
+#### Prerequisites
 - Python 3.8+
-- PostgreSQL
-- [uv](https://github.com/astral-sh/uv) (a fast Python package installer)
-- [Postman](https://www.postman.com/downloads/) (optional, for API testing)
+- PostgreSQL Server
+- `uv` (or `pip` and `venv`)
 
-### 2. Clone the Repository
+#### Steps
+1.  **Navigate to the Backend Directory**
+    ```bash
+    cd backend
+    ```
 
-```bash
-git clone <your-repository-url>
-cd <your-project-folder>
-```
+2.  **Set Up Virtual Environment and Install Dependencies**
+    ```bash
+    # Create and activate a virtual environment
+    uv venv
+    source .venv/bin/activate  # On macOS/Linux
+    # .venv\Scripts\activate  # On Windows
 
-### 3. Set Up Virtual Environment and Install Dependencies
+    # Install dependencies
+    uv pip install -r requirements.txt
+    ```
 
-This project uses uv for a fast and efficient setup.
-```bash
-# Install uv (if you don't have it)
-pip install uv
+3.  **Configure Environment Variables**
+    Create a `.env` file in the `backend` directory and add your database URL and secrets.
+    ```env
+    FLASK_APP=run.py
+    DATABASE_URL=postgresql://your_user:your_password@localhost:5432/your_db_name
+    JWT_SECRET_KEY=a-very-secret-key
+    ```
 
-# Create and activate a virtual environment
-uv venv
+4.  **Set Up the Database**
+    ```bash
+    # Create the database if it doesn't exist
+    python manage.py
 
-# On Linux/macOS
-source .venv/bin/activate
-# On Windows
-.venv\Scripts\activate
+    # Initialize and apply migrations
+    flask db init
+    flask db migrate -m "Initial migration"
+    flask db upgrade
+    ```
 
-# Install dependencies
-uv sync
-```
+5.  **Run the Backend Server**
+    ```bash
+    flask run
+    ```
+    The Flask API will be running on `http://localhost:5000`.
 
-### 4. Configure Environment Variables
+---
+### Option 3: Running the Frontend Individually
 
-The application is configured using a .env file.
+Use this method if you only want to work on the React UI.
 
-    Create a file named .env in the root of the project.
+#### Prerequisites
+- Node.js v18+
+- `npm` or `yarn`
 
-    Copy the contents of .env.example (or the block below) into it.
+#### Steps
+1.  **Navigate to the Frontend Directory**
+    ```bash
+    cd frontend
+    ```
 
-    Update the DATABASE_URL with your actual PostgreSQL credentials.
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-.env file contents:
-```
+3.  **Configure Environment Variables**
+    Create a `.env` file in the `frontend` directory. It must point to the running backend server (either the Docker container or the individual service).
+    ```env
+    VITE_API_BASE_URL=http://localhost:5000
+    ```
 
-# Flask Configuration
-FLASK_APP=run.py
+4.  **Run the Frontend Development Server**
+    ```bash
+    npm run dev
+    ```
+    The React application will be available at `http://localhost:5173`.
 
-# Database Configuration
-# Format: postgresql://<user>:<password>@<host>:<port>/<dbname>
-DATABASE_URL=postgresql://your_username:your_password@localhost:5432/your_database_name
-
-# You can also add other secrets here
-SECRET_KEY=a-strong-and-secret-key
-```
-
-Important: Remember to add the .env file to your .gitignore to keep your secrets safe!
-
-Database Management
-
-This project uses Flask-Migrate to handle database schema changes.
-
-1. Initialize the Database (Run Once)
-
-First, make sure your PostgreSQL server is running and you have created a database with the name you specified in the .env file. Then, run the initialization command:
-```bash
-flask db init
-```
-This creates the migrations/ directory.
-
-2. Create and Apply the First Migration
-```bash
-flask db migrate -m "Initial migration with survey tables"
-flask db upgrade
-```
-
-This will create all the tables in your database based on the SQLAlchemy models defined in the code.
-```bash
-# Generate the migration script
-flask db migrate -m "Initial migration with survey tables"
-
-# Apply the migration to the database
-flask db upgrade
-```
-Whenever you change your models in project/models.py, you must repeat the migrate and upgrade commands to apply the changes to your database.
-
-Running the Application
-
-Once the setup is complete, you can run the Flask development server.
-Bash
-
-flask run
-
-The application will be running at http://127.0.0.1:5000.
-
-Testing the API with Postman
+---
+## API Testing with Postman
 
 A Postman collection is provided to easily test all the API endpoints.
 
-    Import the Collection: Open Postman, click "Import," and paste the contents of the postman_collection.json file.
-
-    Set the baseUrl: In the collection's "Variables" tab, ensure the baseUrl is set to http://127.0.0.1:5000.
-
-    Follow the Workflow:
-
-        Use the System > GET Health Check request to verify the server is running.
-
-        Use the Submissions > POST Create Submission (Webhook) request to populate the database with initial data.
-
-        Explore the other CRUD and analytics endpoints to interact with the data.
+1.  **Import the Collection**: Open Postman and import the `postman_collection.json` file.
+2.  **Set the `baseUrl`**: In the collection's "Variables" tab, set `baseUrl` to `http://localhost` if using Docker, or `http://localhost:5000` if running the backend individually.
+3.  **Authentication**: Run the `/register` and `/login` requests first to get an access token, which will be automatically used for all protected requests.
 

@@ -47,7 +47,7 @@ def create_app(config_class=Config):
 
     CORS(
         app,
-        resources={r"/*": {"origins": "http://localhost:5173"}},
+        resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost"]}},
         supports_credentials=True,
         # Add the methods and headers your frontend needs
         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],

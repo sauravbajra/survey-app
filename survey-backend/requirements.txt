@@ -1,0 +1,12 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+psycopg2-binary
+python-dotenv
+Flask-Cors
+Flask-JWT-Extended
+passlib
+apscheduler
+gunicorn
+sendgrid
+SQLAlchemy-Enum-Tables
