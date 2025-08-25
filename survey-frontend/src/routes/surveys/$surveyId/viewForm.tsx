@@ -265,7 +265,7 @@ function PublicSurveyPage() {
             w="full"
             minH="300px"
             overflowY="auto"
-            py={12}
+            p={4}
             bg="gray.50"
             borderRadius="md"
           >

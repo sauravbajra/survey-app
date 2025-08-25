@@ -32,7 +32,7 @@ import {
 } from '@chakra-ui/react';
 import { api } from '../../../api/apiClient';
 import LoadingSpinner from '../../../components/LoadingSpinner';
-import { Edit, Share2, Trash2, ArrowLeft } from 'lucide-react';
+import { Edit, Share2, Trash2, ArrowLeft, ExternalLink } from 'lucide-react';
 import DeleteConfirmationDialog from '../../../components/DeleteConfirmationDialog';
 import SendSurveyModal from '../../../components/SendSurveyModal';
 import AnalyticsCharts from '../../../components/AnalyticsCharts';
@@ -124,7 +124,12 @@ function SurveyDetailPage() {
             <Button
               variant="link"
               leftIcon={<ArrowLeft size={16} />}
-              onClick={() => router.history.back()}
+              onClick={() => {
+                navigate({
+                  to: '/',
+                  search: { page: 1, status: 'all', is_external: 'all' },
+                });
+              }}
               colorScheme="gray"
               mb={2}
               style={{ textDecoration: 'none' }}
@@ -162,6 +167,15 @@ function SurveyDetailPage() {
               isDisabled={survey.status !== 'published'}
             >
               Share
+            </Button>
+            <Button
+              leftIcon={<ExternalLink size={16} />}
+              as="a"
+              target="_blank"
+              href={`${window.location.origin}/surveys/${surveyId}/viewForm`}
+              isDisabled={survey.status !== 'published'}
+            >
+              Open
             </Button>
             {survey.is_external ? null : (
               <>

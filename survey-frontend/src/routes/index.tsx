@@ -390,12 +390,9 @@ function DashboardPage() {
                               {survey.status === 'published' && (
                                 <MenuItem
                                   icon={<ExternalLink size={16} />}
-                                  onClick={() =>
-                                    navigate({
-                                      to: '/surveys/$surveyId/viewForm',
-                                      params: { surveyId: survey.survey_id },
-                                    })
-                                  }
+                                  as="a"
+                                  target="_blank"
+                                  href={`${window.location.origin}/surveys/${survey.survey_id}/viewForm`}
                                 >
                                   Open Responder View
                                 </MenuItem>
