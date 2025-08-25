@@ -79,7 +79,10 @@ function SurveyDetailPage() {
     onSuccess: () => {
       toast({ title: 'Survey deleted.', status: 'success' });
       queryClient.invalidateQueries({ queryKey: ['surveys'] });
-      navigate({ to: '/' });
+      navigate({
+        to: '/',
+        search: { page: 1, status: 'all', is_external: 'all' },
+      });
     },
     onError: (error: any) => {
       toast({

@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:latest
+    # image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.docker
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./survey-backend
+    command: gunicorn --bind 0.0.0.0:5000 run:app
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./.env.docker
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./survey-frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173" # For Vite HMR during development
+    environment:
+      - VITE_API_BASE_URL=/api
+
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/dist:/usr/share/nginx/html # Mount built files
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:

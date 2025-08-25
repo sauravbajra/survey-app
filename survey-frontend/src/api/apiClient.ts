@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000';
+const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 interface SurveyData {
   survey_title: string;
@@ -24,7 +24,9 @@ interface SurveyFilters {
   is_external?: string;
 }
 
-const apiClient = axios.create({ baseURL });
+const apiClient = axios.create({
+  baseURL: baseURL,
+});
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');

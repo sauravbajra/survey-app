@@ -8,6 +8,7 @@ wheels/
 
 bak/
 .env
+.env.docker
 
 # Virtual environments
 .venv

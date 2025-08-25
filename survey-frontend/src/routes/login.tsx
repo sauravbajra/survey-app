@@ -30,7 +30,10 @@ function LoginPage() {
     setIsLoading(true);
     try {
       await login(username, password);
-      navigate({ to: '/' });
+      navigate({
+        to: '/',
+        search: { page: 1, status: 'all', is_external: 'all' },
+      });
       toast({
         title: 'Login Successful',
         status: 'success',

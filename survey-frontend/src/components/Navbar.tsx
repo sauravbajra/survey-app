@@ -1,4 +1,4 @@
-import { Box, Button, Container, Heading, HStack } from '@chakra-ui/react';
+import { Box, Button, Container, HStack } from '@chakra-ui/react';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import { Home, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +8,10 @@ const Navbar = () => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     await Promise.resolve(logout());
-    navigate({ to: '/' });
+    navigate({
+      to: '/',
+      search: { page: 1, status: 'all', is_external: 'all' },
+    });
   };
   const location = useLocation();
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   createFileRoute,
   useNavigate,
@@ -123,8 +123,9 @@ function EditSurveyPage() {
       );
 
       const questionsToDelete = initialQuestions.filter(
-        (q) => !currentIds.has(q.question_id)
+        (q) => q.question_id && !currentIds.has(q.question_id)
       );
+
       const questionsToUpdate = questions.filter(
         (q) => typeof q.id === 'number' && initialIds.has(q.question_id)
       );

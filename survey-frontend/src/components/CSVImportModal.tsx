@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -35,7 +35,7 @@ interface QuestionPayload {
   options?: string[] | null;
 }
 
-const CsvImportModal: React.FC<CsvImportModalProps> = ({ isOpen, onClose }) => {
+const CsvImportModal = ({ isOpen, onClose }: CsvImportModalProps) => {
   const [file, setFile] = useState<File | null>(null);
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -169,7 +169,7 @@ const CsvImportModal: React.FC<CsvImportModalProps> = ({ isOpen, onClose }) => {
             <Text>
               To help you get started, click here to download a{' '}
               <a
-                href={import.meta.env.VITE_APP_BASE_URL + '/sample-survey.csv'}
+                href={'/sample-survey.csv'}
                 download
                 style={{ color: 'blue', textDecoration: 'underline' }}
               >

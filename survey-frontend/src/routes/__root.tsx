@@ -1,8 +1,16 @@
-import { createRootRoute, Outlet, redirect } from '@tanstack/react-router';
-import { useAuth } from '../context/AuthContext';
+import {
+  createRootRouteWithContext,
+  Outlet,
+  redirect,
+} from '@tanstack/react-router';
+import { useAuth, type AuthContextType } from '../context/AuthContext';
 import MainLayout from '../layouts/MainLayout';
 
-export const Route = createRootRoute({
+interface MyRouterContext {
+  auth: AuthContextType;
+}
+
+export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: RootComponent,
   // Allow public access to this route for submitting surveys
   beforeLoad: ({ context, location }) => {
@@ -23,6 +31,7 @@ export const Route = createRootRoute({
     if (auth?.token && location.pathname === '/login') {
       throw redirect({
         to: '/',
+        search: { page: 1, status: 'all', is_external: 'all' },
       });
     }
   },

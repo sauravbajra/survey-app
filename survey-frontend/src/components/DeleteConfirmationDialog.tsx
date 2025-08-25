@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import {
   AlertDialog,
   AlertDialogBody,
@@ -18,14 +18,14 @@ interface DeleteConfirmationDialogProps {
   body?: string;
 }
 
-const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
+const DeleteConfirmationDialog = ({
   isOpen,
   onClose,
   onConfirm,
   isLoading,
   title = 'Delete Survey',
   body = 'Deleting the survey will delete all data associated with it (questions, submissions, analytics, etc.). This action cannot be undone.',
-}) => {
+}: DeleteConfirmationDialogProps) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   return (

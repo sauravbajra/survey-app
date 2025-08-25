@@ -41,7 +41,7 @@ import { api } from '../api/apiClient';
 import LoadingSpinner from '../components/LoadingSpinner';
 import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog';
 import { useAuth } from '../context/AuthContext';
-import CsvImportModal from '../components/CsvImportModal';
+import CsvImportModal from '../components/CSVImportModal';
 
 export const Route = createFileRoute('/')({
   validateSearch: (search: Record<string, unknown>) => {
@@ -354,9 +354,6 @@ function DashboardPage() {
                               size="sm"
                             />
                             <MenuList>
-                              {/* <MenuItem icon={<BarChart2 size={16} />} onClick={() => navigate({ to: '/surveys/$surveyId/viewSubmissions', params: { surveyId: survey.survey_id } })}>
-                            View Submissions
-                          </MenuItem> */}
                               <MenuItem
                                 icon={<Edit size={16} />}
                                 onClick={() =>
