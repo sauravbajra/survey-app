@@ -391,7 +391,6 @@ function DashboardPage() {
                                 <MenuItem
                                   icon={<ExternalLink size={16} />}
                                   as="a"
-                                  target="_blank"
                                   href={`${window.location.origin}/surveys/${survey.survey_id}/viewForm`}
                                 >
                                   Open Responder View

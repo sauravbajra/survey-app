@@ -169,7 +169,6 @@ function SurveyDetailPage() {
             <Button
               leftIcon={<ExternalLink size={16} />}
               as="a"
-              target="_blank"
               href={`${window.location.origin}/surveys/${surveyId}/viewForm`}
               isDisabled={survey.status !== 'published'}
             >
