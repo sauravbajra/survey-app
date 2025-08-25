@@ -13,8 +13,8 @@ class Config:
 
     # SMTP configuration
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'your_email@gmail.com')  # Use your actual Gmail address
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'your_app_password')     # Use your generated App Password
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'your_email@gmail.com')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'your_app_password')
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True

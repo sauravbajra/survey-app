@@ -35,7 +35,6 @@ def send_survey_email(survey_id):
     if not emails or not isinstance(emails, list):
         return jsonify({"status": "error", "message": "A list of emails is required."}), 400
 
-    # Construct the public URL using a base URL from environment variables
     frontend_url = os.environ.get('FRONTEND_BASE_URL', 'http://localhost')
     public_link = f"{frontend_url}/surveys/{survey_id}/viewForm"
 

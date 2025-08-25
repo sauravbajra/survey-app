@@ -1,7 +1,7 @@
 services:
   db:
-    image: postgres:latest
-    # image: postgres:15-alpine
+    # image: postgres:latest
+    image: postgres:15-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -27,7 +27,7 @@ services:
       - ./survey-frontend:/app
       - /app/node_modules
     ports:
-      - '5173:5173' # For Vite HMR during development
+      - '5173:5173'
     environment:
       - VITE_API_BASE_URL=/api
 
@@ -37,7 +37,7 @@ services:
       - '80:80'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./survey-frontend/dist:/usr/share/nginx/html # Mount built files
+      - ./survey-frontend/dist:/usr/share/nginx/html
     depends_on:
       - survey-backend
       - survey-frontend

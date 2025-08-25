@@ -3,7 +3,6 @@ from . import db
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from passlib.hash import pbkdf2_sha256 as sha256
-# from sqlalchemy_enum_tables import esqla_enum
 
 class SurveyStatus(enum.Enum):
     DRAFT = 'draft'
@@ -25,10 +24,10 @@ class Survey(db.Model):
 
     def to_dict(self):
         return {
-            "survey_id": self.survey_id, 
-            "survey_title": self.survey_title, 
+            "survey_id": self.survey_id,
+            "survey_title": self.survey_title,
             "created_at": self.created_at.isoformat(),
-            "status": self.status.value, 
+            "status": self.status.value,
             "publish_date": self.publish_date.isoformat() if self.publish_date else None,
             "is_external": self.is_external
         }
@@ -39,7 +38,7 @@ class Question(db.Model):
     survey_id = db.Column(db.String(255), db.ForeignKey('surveys.survey_id'), nullable=False)
     question_title = db.Column(db.Text, nullable=False)
     question_type = db.Column(db.String(50), nullable=False)
-    
+
     options = db.Column(JSONB, nullable=True) # To store choices like ["Option A", "Option B"]
 
     survey = db.relationship('Survey', back_populates='questions')

@@ -38,8 +38,8 @@ def create_survey():
     new_survey = Survey(
       survey_id=survey_id,
       survey_title=title,
-      status=SurveyStatus(status_value), # Use the Enum object
-      publish_date=publish_date # Use the parsed date or None
+      status=SurveyStatus(status_value),
+      publish_date=publish_date
     )
 
     db.session.add(new_survey)
@@ -53,21 +53,18 @@ def get_all_surveys():
     Retrieves a paginated and filterable list of all surveys.
     Accepts query parameters for pagination, status, and is_external.
     """
-    # --- Pagination Parameters ---
+
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
 
-    # --- Filter Parameters ---
     status_filter = request.args.get('status', 'all', type=str)
     is_external_filter = request.args.get('is_external', 'all', type=str)
 
-    # Start with a base query
     query = Survey.query
 
     # Apply status filter if it's not 'all'
     if status_filter != 'all':
         try:
-            # Validate and convert string to Enum member
             status_enum = SurveyStatus(status_filter)
             query = query.filter(Survey.status == status_enum)
         except ValueError:

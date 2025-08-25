@@ -24,28 +24,6 @@ def get_submissions_for_survey(survey_id):
         "total_items": submissions_pagination.total
     })
 
-# @submissions_bp.route('/surveys/<string:survey_id>/submissions', methods=['POST'])
-# def create_submission_for_survey(survey_id):
-#     survey = Survey.query.get_or_404(survey_id)
-#     answers_data = request.get_json()
-#     if not isinstance(answers_data, list):
-#         return jsonify({"status": "error", "message": "Request body must be a list of answers"}), 400
-#     try:
-#         new_submission = Submission(survey=survey)
-#         db.session.add(new_submission)
-#         valid_question_ids = {q.question_id for q in survey.questions}
-#         for answer_item in answers_data:
-#             question_id = answer_item.get('question_id')
-#             if not question_id or question_id not in valid_question_ids:
-#                 raise ValueError(f"Invalid or missing question_id: {question_id}")
-#             new_answer = Answer(submission=new_submission, question_id=question_id, answer_value=answer_item.get('answer_value'))
-#             db.session.add(new_answer)
-#         db.session.commit()
-#         return jsonify({"status": "success", "submission_id": new_submission.submission_id}), 201
-#     except ValueError as ve:
-#         db.session.rollback()
-#         return jsonify({"status": "error", "message": str(ve)}), 400
-
 @submissions_bp.route('/submissions/<int:submission_id>', methods=['GET'])
 @jwt_required()
 def get_submission_by_id(submission_id):

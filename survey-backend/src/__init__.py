@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
 from flask_jwt_extended import JWTManager
-from apscheduler.schedulers.background import BackgroundScheduler # Import scheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timezone
 from sqlalchemy import text
 from flask_cors import CORS
@@ -51,7 +51,6 @@ def create_app(config_class=Config):
         app,
         resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost"]}},
         supports_credentials=True,
-        # Add the methods and headers your frontend needs
         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization"]
     )
@@ -61,7 +60,6 @@ def create_app(config_class=Config):
     jwt = JWTManager(app)
     mail.init_app(app)
 
-    # --- CONFIGURE AND START SCHEDULER ---
     scheduler = BackgroundScheduler(daemon=True)
     scheduler.add_job(publish_scheduled_surveys, 'interval', minutes=1, args=[app])
     scheduler.start()
