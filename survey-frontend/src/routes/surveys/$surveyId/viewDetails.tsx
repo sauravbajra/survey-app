@@ -1,7 +1,6 @@
 import {
   createFileRoute,
   useNavigate,
-  useRouter,
 } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -46,7 +45,6 @@ function SurveyDetailPage() {
   const { surveyId } = Route.useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const router = useRouter();
 
   const queryClient = useQueryClient();
   const {
