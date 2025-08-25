@@ -23,7 +23,7 @@ FROM nginx:1.25-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Remove the default Nginx configuration
-RUN rm /etc/nginx/conf.d/default.conf
+RUN rm -f /etc/nginx/conf.d/default.conf
 
 # The docker-compose file will mount the custom nginx.conf
 # Expose port 80
