@@ -35,30 +35,22 @@ This is the easiest way to get the entire application stack running.
 2.  **Configure Docker Environment**
     Create a file named `.env.docker` in the project root by copying the example:
     ```bash
-    cp .env.example .env.docker
+    cp .env.docker.example .env.docker
     ```
-    Update the `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` variables in this file if needed.
+    Update the `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `JWT_SECRET` variables in this file if needed.
 
 3.  **Build and Run the Containers**
     This command will build the images for the frontend and backend, and start all services.
     ```bash
     docker-compose up --build
     ```
-    The application will be available at `http://localhost`.
 
-4.  **Run Database Migrations (First Time)**
-    The first time you start the application, you need to initialize the database schema. Open a **new terminal window** and run:
+    to run in detached mode:
+
     ```bash
-    # Initialize the migrations folder
-    docker-compose exec backend flask db init
-
-    # Generate the initial migration script
-    docker-compose exec backend flask db migrate -m "Initial migration"
-
-    # Apply the migration to the database
-    docker-compose exec backend flask db upgrade
+    docker-compose up --build -d
     ```
-    Your application is now fully set up and running.
+    The application will be available at `http://localhost`.
 
 ---
 ### Option 2: Running the Backend Individually
@@ -80,11 +72,16 @@ Use this method if you only want to work on the Flask API.
     ```bash
     # Create and activate a virtual environment
     uv venv
+    # or using
+    python3 -m venv .venv
+
     source .venv/bin/activate  # On macOS/Linux
-    # .venv\Scripts\activate  # On Windows
 
     # Install dependencies
-    uv pip install -r requirements.txt
+    pip install -r requirements.txt
+
+    # or using
+    uv sync
     ```
 
 3.  **Configure Environment Variables**
@@ -98,11 +95,8 @@ Use this method if you only want to work on the Flask API.
 4.  **Set Up the Database**
     ```bash
     # Create the database if it doesn't exist
-    python manage.py
 
     # Initialize and apply migrations
-    flask db init
-    flask db migrate -m "Initial migration"
     flask db upgrade
     ```
 
@@ -118,7 +112,7 @@ Use this method if you only want to work on the Flask API.
 Use this method if you only want to work on the React UI.
 
 #### Prerequisites
-- Node.js v18+
+- Node.js v20+
 - `npm` or `yarn`
 
 #### Steps
