@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+} from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
@@ -20,9 +24,9 @@ import {
   Collapse,
   RadioGroup,
   Radio,
-  Stack
+  Stack,
 } from '@chakra-ui/react';
-import { Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { api } from '../../../api/apiClient';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 
@@ -48,6 +52,7 @@ export const Route = createFileRoute('/surveys/$surveyId/edit')({
 function EditSurveyPage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { surveyId } = Route.useParams();
 
@@ -55,8 +60,12 @@ function EditSurveyPage() {
   const [title, setTitle] = useState('');
   const [questions, setQuestions] = useState<QuestionForm[]>([]);
   const [publishDate, setPublishDate] = useState('');
-  const [publishOption, setPublishOption] = useState<'immediately' | 'later'>('immediately');
-  const [, setInitialStatus] = useState<'draft' | 'published' | 'scheduled'>('draft');
+  const [publishOption, setPublishOption] = useState<'immediately' | 'later'>(
+    'immediately'
+  );
+  const [, setInitialStatus] = useState<'draft' | 'published' | 'scheduled'>(
+    'draft'
+  );
 
   // Fetch existing survey data
   // Define type for survey data returned by API
@@ -102,34 +111,37 @@ function EditSurveyPage() {
 
       if (survey.status === 'scheduled' && survey.publish_date) {
         setPublishOption('later');
-        const localDate = new Date(survey.publish_date).toISOString().slice(0, 16);
+        const localDate = new Date(survey.publish_date)
+          .toISOString()
+          .slice(0, 16);
         setPublishDate(localDate);
       }
     }
   }, [surveyData]);
 
   const surveyMutation = useMutation({
-    mutationFn: (updatedSurvey: UpdateSurveyPayload) => api.updateSurvey(surveyId, updatedSurvey),
+    mutationFn: (updatedSurvey: UpdateSurveyPayload) =>
+      api.updateSurvey(surveyId, updatedSurvey),
     onSuccess: async () => {
       // Logic to update/create/delete questions can be added here
       // For simplicity, we'll just show a success message for the survey update
-        await Promise.all(
-    questions
-      .filter(q => q.question_id)
-      .map(q =>
-        updateQuestionMutation.mutateAsync({
-          questionId: q.question_id!,
-          data: {
-            question_title: q.question_title,
-            question_type: q.question_type,
-            options: q.options,
-          },
-        })
-      )
-  );
+      await Promise.all(
+        questions
+          .filter((q) => q.question_id)
+          .map((q) =>
+            updateQuestionMutation.mutateAsync({
+              questionId: q.question_id!,
+              data: {
+                question_title: q.question_title,
+                question_type: q.question_type,
+                options: q.options,
+              },
+            })
+          )
+      );
       toast({
         title: 'Survey updated.',
-        description: "Your survey has been updated successfully.",
+        description: 'Your survey has been updated successfully.',
         status: 'success',
         duration: 5000,
         isClosable: true,
@@ -149,35 +161,54 @@ function EditSurveyPage() {
     },
   });
   const updateQuestionMutation = useMutation({
-  mutationFn: ({ questionId, data }: { questionId: number, data: Partial<QuestionForm> }) =>
-    api.updateQuestion(questionId, data),
-  onSuccess: () => {
-    // Optionally show a toast or refetch questions
-  },
-  onError: (error: any) => {
-    toast({
-      title: 'Question update failed.',
-      description: error.response?.data?.message || 'An error occurred.',
-      status: 'error',
-      duration: 5000,
-      isClosable: true,
-    });
-  },
-});
+    mutationFn: ({
+      questionId,
+      data,
+    }: {
+      questionId: number;
+      data: Partial<QuestionForm>;
+    }) => api.updateQuestion(questionId, data),
+    onSuccess: () => {
+      // Optionally show a toast or refetch questions
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Question update failed.',
+        description: error.response?.data?.message || 'An error occurred.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    },
+  });
 
   const handleAddQuestion = () => {
-    setQuestions([...questions, { id: `new-${Date.now()}`, question_title: '', question_type: 'TEXT', options: [] }]);
+    setQuestions([
+      ...questions,
+      {
+        id: `new-${Date.now()}`,
+        question_title: '',
+        question_type: 'TEXT',
+        options: [],
+      },
+    ]);
   };
 
-  const handleQuestionChange = (index: number, field: keyof QuestionForm, value: any) => {
+  const handleQuestionChange = (
+    index: number,
+    field: keyof QuestionForm,
+    value: any
+  ) => {
     const newQuestions = [...questions];
     if (field === 'options') {
-      newQuestions[index][field] = value.split(',').map((opt: string) => opt.trim());
+      newQuestions[index][field] = value
+        .split(',')
+        .map((opt: string) => opt.trim());
     } else {
       (newQuestions[index] as any)[field] = value;
     }
     if (field === 'question_type' && value === 'TEXT') {
-        newQuestions[index].options = [];
+      newQuestions[index].options = [];
     }
     setQuestions(newQuestions);
   };
@@ -188,58 +219,94 @@ function EditSurveyPage() {
 
   const handleSubmit = (status: 'draft' | 'published' | 'scheduled') => {
     if (!title) {
-        toast({ title: "Survey Title is required.", status: 'warning', duration: 3000, isClosable: true });
-        return;
+      toast({
+        title: 'Survey Title is required.',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
     }
 
     const payload: UpdateSurveyPayload = { survey_title: title, status };
 
     if (status === 'scheduled') {
-        if (!publishDate) {
-            toast({ title: "Please select a publish date to schedule.", status: 'warning', duration: 3000, isClosable: true });
-            return;
-        }
-        if (new Date(publishDate).toISOString() <= new Date().toISOString()) {
-            toast({ title: "Scheduled publish date must be in the future.", status: 'warning', duration: 3000, isClosable: true });
-            return;
-        }
-        payload.publish_date = new Date(publishDate).toISOString();
+      if (!publishDate) {
+        toast({
+          title: 'Please select a publish date to schedule.',
+          status: 'warning',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+      if (new Date(publishDate).toISOString() <= new Date().toISOString()) {
+        toast({
+          title: 'Scheduled publish date must be in the future.',
+          status: 'warning',
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+      payload.publish_date = new Date(publishDate).toISOString();
     }
 
     surveyMutation.mutate(payload);
   };
 
   const handlePublishClick = () => {
-      if (publishOption === 'immediately') {
-          handleSubmit('published');
-      } else {
-          handleSubmit('scheduled');
-      }
-  }
+    if (publishOption === 'immediately') {
+      handleSubmit('published');
+    } else {
+      handleSubmit('scheduled');
+    }
+  };
 
   if (isLoadingSurvey) {
-      return <LoadingSpinner />;
+    return <LoadingSpinner />;
   }
 
   return (
     <Box>
-      <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align="center" mb={6}>
+      <Button
+        variant="link"
+        leftIcon={<ArrowLeft size={16} />}
+        onClick={() => router.history.back()}
+        colorScheme="gray"
+        mb={4}
+      >
+        Back
+      </Button>
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        justify="space-between"
+        align="center"
+        mb={4}
+      >
         <Heading size="lg">Edit Survey</Heading>
         <HStack spacing={4} mt={{ base: 4, md: 0 }}>
-            <Button
-                variant="outline"
-                onClick={() => handleSubmit('draft')}
-                isLoading={surveyMutation.isPending && surveyMutation.variables?.status === 'draft'}
-            >
-                Save Draft
-            </Button>
-            <Button
-                colorScheme="blue"
-                onClick={handlePublishClick}
-                isLoading={surveyMutation.isPending && (surveyMutation.variables?.status === 'published' || surveyMutation.variables?.status === 'scheduled')}
-            >
-                Update
-            </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleSubmit('draft')}
+            isLoading={
+              surveyMutation.isPending &&
+              surveyMutation.variables?.status === 'draft'
+            }
+          >
+            Save Draft
+          </Button>
+          <Button
+            colorScheme="blue"
+            onClick={handlePublishClick}
+            isLoading={
+              surveyMutation.isPending &&
+              (surveyMutation.variables?.status === 'published' ||
+                surveyMutation.variables?.status === 'scheduled')
+            }
+          >
+            Update
+          </Button>
         </HStack>
       </Flex>
       <Box bg="white" p={8} borderRadius="lg" boxShadow="base">
@@ -247,7 +314,11 @@ function EditSurveyPage() {
           {/* Survey Details */}
           <FormControl isRequired>
             <FormLabel>Survey Title</FormLabel>
-            <Input placeholder="e.g., Customer Feedback Q3" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input
+              placeholder="e.g., Customer Feedback Q3"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </FormControl>
           <FormControl>
             <FormLabel>Survey ID</FormLabel>
@@ -258,22 +329,29 @@ function EditSurveyPage() {
 
           {/* Publishing Options */}
           <Box p={4} borderWidth={1} borderRadius="md">
-            <Heading size="sm" mb={4}>Publishing</Heading>
-            <RadioGroup onChange={(value) => setPublishOption(value as 'immediately' | 'later')} value={publishOption}>
-                <Stack direction="column">
-                    <Radio value="immediately">Publish Immediately</Radio>
-                    <Radio value="later">Publish Later</Radio>
-                </Stack>
+            <Heading size="sm" mb={4}>
+              Publishing
+            </Heading>
+            <RadioGroup
+              onChange={(value) =>
+                setPublishOption(value as 'immediately' | 'later')
+              }
+              value={publishOption}
+            >
+              <Stack direction="column">
+                <Radio value="immediately">Publish Immediately</Radio>
+                <Radio value="later">Publish Later</Radio>
+              </Stack>
             </RadioGroup>
             <Collapse in={publishOption === 'later'} animateOpacity>
-                <FormControl mt={4}>
-                    <FormLabel>Publish Date & Time</FormLabel>
-                    <Input
-                        type="datetime-local"
-                        value={publishDate}
-                        onChange={(e) => setPublishDate(e.target.value)}
-                    />
-                </FormControl>
+              <FormControl mt={4}>
+                <FormLabel>Publish Date & Time</FormLabel>
+                <Input
+                  type="datetime-local"
+                  value={publishDate}
+                  onChange={(e) => setPublishDate(e.target.value)}
+                />
+              </FormControl>
             </Collapse>
           </Box>
 
@@ -282,28 +360,77 @@ function EditSurveyPage() {
           {/* Questions Section */}
           <Heading size="md">Questions</Heading>
           {questions.map((q, index) => (
-            <VStack key={q.id} p={4} borderWidth={1} borderRadius="md" align="stretch" spacing={4}>
+            <VStack
+              key={q.id}
+              p={4}
+              borderWidth={1}
+              borderRadius="md"
+              align="stretch"
+              spacing={4}
+            >
               <HStack justify="space-between">
                 <Text fontWeight="bold">Question {index + 1}</Text>
                 {questions.length > 1 && (
-                  <IconButton aria-label="Remove question" icon={<Trash2 size={16} />} size="sm" colorScheme="red" variant="ghost" onClick={() => handleRemoveQuestion(index)} />
+                  <IconButton
+                    aria-label="Remove question"
+                    icon={<Trash2 size={16} />}
+                    size="sm"
+                    colorScheme="red"
+                    variant="ghost"
+                    onClick={() => handleRemoveQuestion(index)}
+                  />
                 )}
               </HStack>
-              <FormControl isRequired><FormLabel>Question Title</FormLabel><Input placeholder="e.g., How was your experience?" value={q.question_title} onChange={(e) => handleQuestionChange(index, 'question_title', e.target.value)} /></FormControl>
-              <FormControl isRequired><FormLabel>Question Type</FormLabel><Select value={q.question_type} onChange={(e) => handleQuestionChange(index, 'question_type', e.target.value)}><option value="TEXT">Text</option><option value="MULTIPLE_CHOICE">Multiple Choice</option><option value="CHECKBOX">Checkbox</option><option value="DROPDOWN">Dropdown</option></Select></FormControl>
+              <FormControl isRequired>
+                <FormLabel>Question Title</FormLabel>
+                <Input
+                  placeholder="e.g., How was your experience?"
+                  value={q.question_title}
+                  onChange={(e) =>
+                    handleQuestionChange(
+                      index,
+                      'question_title',
+                      e.target.value
+                    )
+                  }
+                />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Question Type</FormLabel>
+                <Select
+                  value={q.question_type}
+                  onChange={(e) =>
+                    handleQuestionChange(index, 'question_type', e.target.value)
+                  }
+                >
+                  <option value="TEXT">Text</option>
+                  <option value="MULTIPLE_CHOICE">Multiple Choice</option>
+                  <option value="CHECKBOX">Checkbox</option>
+                  <option value="DROPDOWN">Dropdown</option>
+                </Select>
+              </FormControl>
               {q.question_type !== 'TEXT' && (
                 <FormControl isRequired>
                   <FormLabel>Options (comma-separated)</FormLabel>
                   <Textarea
                     placeholder="e.g., Good, Neutral, Bad"
                     value={(q.options ?? []).join(', ')}
-                    onChange={(e) => handleQuestionChange(index, 'options', e.target.value)}
+                    onChange={(e) =>
+                      handleQuestionChange(index, 'options', e.target.value)
+                    }
                   />
                 </FormControl>
               )}
             </VStack>
           ))}
-          <Button leftIcon={<Plus size={16} />} onClick={handleAddQuestion} variant="outline" alignSelf="flex-start">Add Question</Button>
+          <Button
+            leftIcon={<Plus size={16} />}
+            onClick={handleAddQuestion}
+            variant="outline"
+            alignSelf="flex-start"
+          >
+            Add Question
+          </Button>
         </VStack>
       </Box>
     </Box>

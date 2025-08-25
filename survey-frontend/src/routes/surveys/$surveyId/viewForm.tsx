@@ -152,7 +152,7 @@ function PublicSurveyPage() {
 
   if (isSubmitted) {
     return (
-         <Flex minH="100vh" direction="column" justify="center"  p={4}>
+         <Flex minH="100vh" direction="column" p={4}>
       <Box bg="white" p={8} borderRadius="lg" boxShadow="lg" w="full" maxW="xl" mx="auto">
         <Center >
             <Box p={8} textAlign="center"><Heading size="xl" color="green.500">Thank You!</Heading><Text mt={4}>Your response has been recorded.</Text></Box>
@@ -163,7 +163,7 @@ function PublicSurveyPage() {
   }
 
   return (
-    <Flex minH="100vh" direction="column" justify="center"  p={4}>
+    <Flex minH="100vh" direction="column" p={4}>
       <Box bg="white" p={8} borderRadius="lg" boxShadow="lg" w="full" maxW="xl" mx="auto">
         <VStack spacing={4} align="stretch">
           <Box textAlign="center" mb={4}>

@@ -1,17 +1,17 @@
 import type { ReactNode } from 'react';
-import { Container, Flex } from '@chakra-ui/react';
-import Sidebar from '../components/Sidebar';
+import { Box, Container, VStack } from '@chakra-ui/react';
+import Navbar from '../components/Navbar';
 
 const MainLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <Container maxW={{ base: '100%' }}>
-      <Flex>
-        <Sidebar />
-        <Container  maxW={{ base: '100%', md: '9xl' }} ml={{ base: 0, md: '250px' }} p={8} w="100%">
+    <Box maxW={{ base: '100%' }}>
+      <VStack spacing={8}>
+        <Navbar />
+        <Container  maxW={{ base: '100%', md: '6xl' }} w="100%">
           {children}
         </Container>
-      </Flex>
-    </Container>
+      </VStack>
+    </Box>
   );
 };
 export default MainLayout;
