@@ -28,7 +28,6 @@ const Navbar = () => {
       variant="link"
       justifyContent="flex-start"
       style={{ textDecoration: 'none' }}
-      // variant={location.pathname === to ? 'solid' : 'ghost'}
       colorScheme={location.pathname === to ? 'blue' : 'dark'}
       leftIcon={<Icon size={20} />}
     >
@@ -39,7 +38,6 @@ const Navbar = () => {
   return (
     <Box
       as="nav"
-      // pos="fixed"
       left="0"
       top="0"
       w="100%"

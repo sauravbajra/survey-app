@@ -25,14 +25,14 @@ import {
   RadioGroup,
   Radio,
   Stack,
+  Center,
 } from '@chakra-ui/react';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { api } from '../../../api/apiClient';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 
-// Define types for our forms and API payloads
 type QuestionForm = {
-  id: number | string; // Can be number for existing, string for new
+  id: number | string;
   question_id?: number;
   question_title: string;
   question_type: 'TEXT' | 'MULTIPLE_CHOICE' | 'CHECKBOX' | 'DROPDOWN';
@@ -56,10 +56,9 @@ function EditSurveyPage() {
   const queryClient = useQueryClient();
   const { surveyId } = Route.useParams();
 
-  // State for form fields
   const [title, setTitle] = useState('');
   const [questions, setQuestions] = useState<QuestionForm[]>([]);
-  const [initialQuestions, setInitialQuestions] = useState<QuestionForm[]>([]); // To track changes
+  const [initialQuestions, setInitialQuestions] = useState<QuestionForm[]>([]);
   const [publishDate, setPublishDate] = useState('');
   const [publishOption, setPublishOption] = useState<'immediately' | 'later'>(
     'immediately'
@@ -75,7 +74,6 @@ function EditSurveyPage() {
     enabled: !!surveyId,
   });
 
-  // Populate form state once data is fetched
   useEffect(() => {
     if (surveyData) {
       const survey = surveyData.data;
@@ -88,7 +86,7 @@ function EditSurveyPage() {
         options: q.options ?? [],
       }));
       setQuestions(formattedQuestions);
-      setInitialQuestions(formattedQuestions); // Set initial state for comparison
+      setInitialQuestions(formattedQuestions);
 
       if (survey.status === 'scheduled' && survey.publish_date) {
         setPublishOption('later');
@@ -100,7 +98,6 @@ function EditSurveyPage() {
     }
   }, [surveyData]);
 
-  // --- Mutations for Questions ---
   const createQuestionMutation = useMutation({
     mutationFn: (data: any) => api.createQuestion(surveyId, data),
   });
@@ -116,7 +113,6 @@ function EditSurveyPage() {
     mutationFn: (updatedSurvey: UpdateSurveyPayload) =>
       api.updateSurvey(surveyId, updatedSurvey),
     onSuccess: async () => {
-      // Compare initial and current questions to determine changes
       const initialIds = new Set(initialQuestions.map((q) => q.question_id));
       const currentIds = new Set(
         questions.filter((q) => typeof q.id === 'number').map((q) => q.id)
@@ -134,7 +130,6 @@ function EditSurveyPage() {
       );
 
       try {
-        // Execute all API calls in parallel
         await Promise.all([
           ...questionsToDelete.map((q) =>
             deleteQuestionMutation.mutateAsync(q.question_id!)
@@ -290,6 +285,22 @@ function EditSurveyPage() {
     );
   }
 
+  if (surveyData?.data.is_external) {
+    return (
+      <Center>
+        <Box p={8} textAlign="center">
+          <Heading size="lg" color="gray.600">
+            Survey Not Available
+          </Heading>
+          <Text mt={4}>
+            This survey might not be avaiblable to edit or the link is
+            incorrect.
+          </Text>
+        </Box>
+      </Center>
+    );
+  }
+
   return (
     <Box>
       <Button
@@ -335,7 +346,6 @@ function EditSurveyPage() {
       </Flex>
       <Box bg="white" p={8} borderRadius="lg" boxShadow="base">
         <VStack spacing={6} align="stretch">
-          {/* Survey Details */}
           <FormControl isRequired>
             <FormLabel>Survey Title</FormLabel>
             <Input
@@ -351,7 +361,6 @@ function EditSurveyPage() {
 
           <Divider my={4} />
 
-          {/* Publishing Options */}
           <Box p={4} borderWidth={1} borderRadius="md">
             <Heading size="sm" mb={4}>
               Publishing
@@ -381,7 +390,6 @@ function EditSurveyPage() {
 
           <Divider my={4} />
 
-          {/* Questions Section */}
           <Heading size="md">Questions</Heading>
           {questions.map((q, index) => (
             <VStack

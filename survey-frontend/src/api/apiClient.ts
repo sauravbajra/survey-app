@@ -120,5 +120,5 @@ export const api = {
 
   // Send Email
   sendSurveyByEmail: (surveyId: string, emailList: string[]) =>
-    apiClient.post(`/surveys/${surveyId}/send`, { emails: emailList })
+    apiClient.post(`/surveys/${surveyId}/send`, { emails: emailList }),
 };

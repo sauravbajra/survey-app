@@ -100,7 +100,7 @@ function LoginPage() {
             colorScheme="blue"
             width="full"
             isLoading={isLoading}
-            fontSize='lg'
+            fontSize="lg"
           >
             Login
           </Button>

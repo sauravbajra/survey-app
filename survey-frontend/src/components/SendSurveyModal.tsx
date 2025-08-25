@@ -16,7 +16,7 @@ import {
   Textarea,
   HStack,
   Input,
-  Divider
+  Divider,
 } from '@chakra-ui/react';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '../api/apiClient';
@@ -28,13 +28,20 @@ interface SendSurveyModalProps {
   surveyId: string | null;
 }
 
-const SendSurveyModal: React.FC<SendSurveyModalProps> = ({ isOpen, onClose, surveyId }) => {
+const SendSurveyModal: React.FC<SendSurveyModalProps> = ({
+  isOpen,
+  onClose,
+  surveyId,
+}) => {
   const [emails, setEmails] = useState('');
   const toast = useToast();
-  const publicUrl = surveyId ? `${window.location.origin}/public/surveys/${surveyId}` : '';
+  const publicUrl = surveyId
+    ? `${window.location.origin}/public/surveys/${surveyId}`
+    : '';
 
   const mutation = useMutation({
-    mutationFn: (emailList: string[]) => api.sendSurveyByEmail(surveyId!, emailList),
+    mutationFn: (emailList: string[]) =>
+      api.sendSurveyByEmail(surveyId!, emailList),
     onSuccess: () => {
       toast({
         title: 'Survey Sent.',
@@ -49,7 +56,8 @@ const SendSurveyModal: React.FC<SendSurveyModalProps> = ({ isOpen, onClose, surv
     onError: (error: any) => {
       toast({
         title: 'Failed to send.',
-        description: error.response?.data?.message || 'An unexpected error occurred.',
+        description:
+          error.response?.data?.message || 'An unexpected error occurred.',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -59,23 +67,29 @@ const SendSurveyModal: React.FC<SendSurveyModalProps> = ({ isOpen, onClose, surv
 
   const handleSend = () => {
     if (!emails.trim()) {
-      toast({ title: 'Please enter at least one email address.', status: 'warning' });
+      toast({
+        title: 'Please enter at least one email address.',
+        status: 'warning',
+      });
       return;
     }
-    const emailList = emails.split(',').map(email => email.trim()).filter(Boolean);
+    const emailList = emails
+      .split(',')
+      .map((email) => email.trim())
+      .filter(Boolean);
     mutation.mutate(emailList);
   };
 
   const handleCopyLink = () => {
-      navigator.clipboard.writeText(publicUrl).then(() => {
-          toast({
-              title: "Public link copied!",
-              description: "The link has been copied to your clipboard.",
-              status: "success",
-              duration: 3000,
-              isClosable: true,
-          });
+    navigator.clipboard.writeText(publicUrl).then(() => {
+      toast({
+        title: 'Public link copied!',
+        description: 'The link has been copied to your clipboard.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
       });
+    });
   };
 
   return (
@@ -86,19 +100,21 @@ const SendSurveyModal: React.FC<SendSurveyModalProps> = ({ isOpen, onClose, surv
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={4} align="stretch">
-            {/* Copy Link Section */}
             <FormControl>
               <FormLabel>Public Survey Link</FormLabel>
               <HStack>
                 <Input value={publicUrl} isReadOnly />
-                <Button leftIcon={<Copy size={16} />} onClick={handleCopyLink}>Copy</Button>
+                <Button leftIcon={<Copy size={16} />} onClick={handleCopyLink}>
+                  Copy
+                </Button>
               </HStack>
             </FormControl>
 
             <Divider />
 
-            {/* Email Section */}
-            <Text>Or, enter recipient email addresses, separated by commas.</Text>
+            <Text>
+              Or, enter recipient email addresses, separated by commas.
+            </Text>
             <FormControl>
               <FormLabel>Send via Email</FormLabel>
               <Textarea
@@ -113,7 +129,11 @@ const SendSurveyModal: React.FC<SendSurveyModalProps> = ({ isOpen, onClose, surv
           <Button variant="ghost" mr={3} onClick={onClose}>
             Cancel
           </Button>
-          <Button colorScheme="blue" onClick={handleSend} isLoading={mutation.isPending}>
+          <Button
+            colorScheme="blue"
+            onClick={handleSend}
+            isLoading={mutation.isPending}
+          >
             Send Emails
           </Button>
         </ModalFooter>

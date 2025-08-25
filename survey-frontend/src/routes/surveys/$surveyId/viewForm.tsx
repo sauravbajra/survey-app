@@ -27,7 +27,6 @@ export const Route = createFileRoute('/surveys/$surveyId/viewForm')({
   component: PublicSurveyPage,
 });
 
-// Define types for the questions and conversation history
 type Question = {
   question_id: number;
   title: string;
@@ -38,14 +37,13 @@ type Question = {
 type ConversationMessage = {
   type: 'question' | 'answer';
   content: any;
-  question_title?: string; // For answers, to show what was asked
+  question_title?: string;
 };
 
 function PublicSurveyPage() {
   const { surveyId } = Route.useParams();
   const toast = useToast();
 
-  // State for the conversational flow
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -82,7 +80,6 @@ function PublicSurveyPage() {
   const currentQuestion: Question | undefined =
     survey?.questions[currentQuestionIndex];
 
-  // Initialize the conversation with the first question when the survey loads
   useEffect(() => {
     if (survey?.questions?.length > 0 && conversation.length === 0) {
       setConversation([{ type: 'question', content: survey.questions[0] }]);
@@ -117,7 +114,6 @@ function PublicSurveyPage() {
       question_title: currentQuestion.title,
     };
 
-    // If it's the last question, submit the survey
     if (currentQuestionIndex === survey.questions.length - 1) {
       setConversation((prev) => [...prev, newAnswerMessage]);
       const submissionPayload = Object.entries(answers).map(
@@ -128,7 +124,6 @@ function PublicSurveyPage() {
       );
       submissionMutation.mutate(submissionPayload);
     } else {
-      // Otherwise, add the answer and the next question to the conversation
       const nextQuestion = survey.questions[currentQuestionIndex + 1];
       setConversation((prev) => [
         ...prev,
@@ -264,7 +259,6 @@ function PublicSurveyPage() {
             <Heading size="lg">{survey.survey_title}</Heading>
           </Box>
 
-          {/* Chat History */}
           <VStack
             spacing={4}
             align="stretch"
@@ -307,7 +301,6 @@ function PublicSurveyPage() {
             ))}
           </VStack>
 
-          {/* Current Question Input */}
           <Box>
             {currentQuestion && (
               <SlideFade key={currentQuestionIndex} in={true} offsetY="20px">

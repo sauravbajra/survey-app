@@ -34,7 +34,7 @@ import { api } from '../../../api/apiClient';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import { Edit, Share2, Trash2, ArrowLeft } from 'lucide-react';
 import DeleteConfirmationDialog from '../../../components/DeleteConfirmationDialog';
-import SendSurveyModal from '../../../components/SendSurveyModal'; // Import the modal
+import SendSurveyModal from '../../../components/SendSurveyModal';
 import AnalyticsCharts from '../../../components/AnalyticsCharts';
 import { SubmissionRow } from '../../../components/SubmissionRow';
 
@@ -58,9 +58,8 @@ function SurveyDetailPage() {
     isOpen: isSendOpen,
     onOpen: onSendOpen,
     onClose: onSendClose,
-  } = useDisclosure(); // State for the send modal
+  } = useDisclosure();
 
-  // Fetch Survey Details directly in this component
   const {
     data: surveyData,
     isLoading: isLoadingSurvey,
@@ -70,7 +69,6 @@ function SurveyDetailPage() {
     queryFn: () => api.getSurveyById(surveyId),
   });
 
-  // Fetch Submissions and Analytics separately
   const { data: submissionsData, isLoading: isLoadingSubmissions } = useQuery({
     queryKey: ['submissions', surveyId],
     queryFn: () => api.getSubmissionsForSurvey(surveyId),
@@ -165,25 +163,29 @@ function SurveyDetailPage() {
             >
               Share
             </Button>
-            <Button
-              leftIcon={<Edit size={16} />}
-              onClick={() =>
-                navigate({
-                  to: '/surveys/$surveyId/edit',
-                  params: { surveyId },
-                })
-              }
-              colorScheme="blue"
-            >
-              Edit
-            </Button>
-            <Button
-              leftIcon={<Trash2 size={16} />}
-              onClick={onDeleteOpen}
-              colorScheme="red"
-            >
-              Delete
-            </Button>
+            {survey.is_external ? null : (
+              <>
+                <Button
+                  leftIcon={<Edit size={16} />}
+                  onClick={() =>
+                    navigate({
+                      to: '/surveys/$surveyId/edit',
+                      params: { surveyId },
+                    })
+                  }
+                  colorScheme="blue"
+                >
+                  Edit
+                </Button>
+                <Button
+                  leftIcon={<Trash2 size={16} />}
+                  onClick={onDeleteOpen}
+                  colorScheme="red"
+                >
+                  Delete
+                </Button>
+              </>
+            )}
           </HStack>
         </Flex>
 
