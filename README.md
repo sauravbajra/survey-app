@@ -73,7 +73,7 @@ Use this method if you only want to work on the Flask API.
 #### Steps
 1.  **Navigate to the Backend Directory**
     ```bash
-    cd backend
+    cd survey-backend
     ```
 
 2.  **Set Up Virtual Environment and Install Dependencies**
@@ -93,7 +93,7 @@ Use this method if you only want to work on the Flask API.
     ```
 
 3.  **Configure Environment Variables**
-    Create a `.env` file in the `backend` directory and add your database URL and secrets.
+    Create a `.env` file in the `survey-backend` directory and add your database URL and secrets.
     ```env
     FLASK_APP=run.py
     DATABASE_URL=postgresql://your_user:your_password@localhost:5432/your_db_name
@@ -126,7 +126,7 @@ Use this method if you only want to work on the React UI.
 #### Steps
 1.  **Navigate to the Frontend Directory**
     ```bash
-    cd frontend
+    cd survey-frontend
     ```
 
 2.  **Install Dependencies**
@@ -135,7 +135,7 @@ Use this method if you only want to work on the React UI.
     ```
 
 3.  **Configure Environment Variables**
-    Create a `.env` file in the `frontend` directory. It must point to the running backend server (either the Docker container or the individual service).
+    Create a `.env` file in the `survey-frontend` directory. It must point to the running backend server (either the Docker container or the individual service).
     ```env
     VITE_API_BASE_URL=http://localhost:5000
     ```
